@@ -15,24 +15,21 @@ Sections:
  11. Metadata Statistics
  12. Export Statistics
  13. Recent Logs
-
-All data is loaded from existing managers. Zero fake data.
 """
 
 import logging
-import os
 from datetime import datetime, date
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QFrame, QGridLayout, QScrollArea,
     QSizePolicy, QFileDialog, QMessageBox, QListWidget,
-    QListWidgetItem, QSpacerItem
+    QListWidgetItem
 )
 from PySide6.QtCore import Qt, Signal, QTimer
-from PySide6.QtGui import QColor, QFont, QPalette
+from PySide6.QtGui import QColor
 
 from gui.widgets.icon_loader import IconLoader
 from core.constants import AppConstants
@@ -42,11 +39,8 @@ from workspace.workspace_events import WorkspaceEvents
 logger = logging.getLogger(__name__)
 
 # ─────────────────────────────────────────────
-# Style constants (VS Code dark theme palette)
+# Style constants
 # ─────────────────────────────────────────────
-_BG_CARD     = "#252526"
-_BG_CARD2    = "#2d2d30"
-_BORDER      = "#3f3f46"
 _TEXT_PRIMARY = "#d4d4d4"
 _TEXT_MUTED   = "#858585"
 _ACCENT_BLUE  = "#007acc"
@@ -55,22 +49,13 @@ _ACCENT_ORANGE = "#e8a000"
 _ACCENT_RED   = "#f44747"
 _ACCENT_PURPLE = "#9b59b6"
 
-_CARD_STYLE = f"""
-    QFrame {{
-        background-color: {_BG_CARD};
-        border: 1px solid {_BORDER};
+_CARD_STYLE = """
+    QFrame {
+        background-color: palette(base);
+        border: 1px solid palette(alternate-base);
         border-radius: 8px;
-    }}
+    }
 """
-
-_SECTION_TITLE_STYLE = f"color: {_TEXT_PRIMARY}; font-size: 13px; font-weight: bold;"
-_MUTED_STYLE = f"color: {_TEXT_MUTED}; font-size: 11px;"
-_VALUE_STYLE  = "color: #ffffff; font-size: 22px; font-weight: bold;"
-
-
-# ─────────────────────────────────────────────
-# Reusable helper widgets
-# ─────────────────────────────────────────────
 
 class SectionLabel(QLabel):
     def __init__(self, text: str, parent=None):
@@ -80,12 +65,10 @@ class SectionLabel(QLabel):
             f"text-transform: uppercase; letter-spacing: 1px; padding: 0;"
         )
 
-
 class CardFrame(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setStyleSheet(_CARD_STYLE)
-
 
 class StatBadge(QLabel):
     def __init__(self, value: str, color: str = _ACCENT_BLUE, parent=None):
@@ -97,10 +80,7 @@ class StatBadge(QLabel):
         )
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-
 class MetricCard(CardFrame):
-    """Displays a single KPI: icon + title + big value + optional delta."""
-
     def __init__(self, title: str, value: str = "0", icon_name: str = "image",
                  accent: str = _ACCENT_BLUE, parent=None):
         super().__init__(parent)
@@ -110,7 +90,6 @@ class MetricCard(CardFrame):
         row.setContentsMargins(16, 14, 16, 14)
         row.setSpacing(14)
 
-        # Icon circle
         icon_container = QFrame()
         icon_container.setFixedSize(44, 44)
         icon_container.setStyleSheet(
@@ -125,13 +104,12 @@ class MetricCard(CardFrame):
         lbl_icon.setStyleSheet("background: transparent; border: none;")
         icon_row.addWidget(lbl_icon)
 
-        # Text stack
         col = QVBoxLayout()
         col.setSpacing(2)
         lbl_title = QLabel(title)
         lbl_title.setStyleSheet(f"color: {_TEXT_MUTED}; font-size: 11px; background: transparent; border: none;")
         self.lbl_value = QLabel(str(value))
-        self.lbl_value.setStyleSheet(f"color: #ffffff; font-size: 20px; font-weight: bold; background: transparent; border: none;")
+        self.lbl_value.setStyleSheet(f"color: palette(text); font-size: 20px; font-weight: bold; background: transparent; border: none;")
         col.addWidget(lbl_title)
         col.addWidget(self.lbl_value)
 
@@ -139,9 +117,8 @@ class MetricCard(CardFrame):
         row.addLayout(col)
         row.addStretch()
 
-    def set_value(self, v: str):
+    def set_value(self, v: str) -> None:
         self.lbl_value.setText(str(v))
-
 
 class QuickActionButton(QPushButton):
     def __init__(self, label: str, icon_name: str, accent: str = _ACCENT_BLUE, parent=None):
@@ -152,10 +129,10 @@ class QuickActionButton(QPushButton):
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setStyleSheet(f"""
             QPushButton {{
-                background-color: {_BG_CARD2};
-                border: 1px solid {_BORDER};
+                background-color: palette(button);
+                border: 1px solid palette(alternate-base);
                 border-radius: 6px;
-                color: {_TEXT_PRIMARY};
+                color: palette(button-text);
                 font-size: 13px;
                 text-align: left;
                 padding-left: 8px;
@@ -163,13 +140,12 @@ class QuickActionButton(QPushButton):
             QPushButton:hover {{
                 background-color: {accent}22;
                 border: 1px solid {accent};
-                color: #ffffff;
+                color: {accent};
             }}
             QPushButton:pressed {{
                 background-color: {accent}44;
             }}
         """)
-
 
 class StatusDot(QLabel):
     def __init__(self, online: bool, parent=None):
@@ -179,7 +155,6 @@ class StatusDot(QLabel):
         self.setStyleSheet(
             f"background-color: {color}; border-radius: 5px; border: none;"
         )
-
 
 class LogRow(QFrame):
     def __init__(self, level: str, message: str, timestamp: str, parent=None):
@@ -196,7 +171,7 @@ class LogRow(QFrame):
         badge.setFixedWidth(40)
 
         lbl_msg = QLabel(message)
-        lbl_msg.setStyleSheet(f"color: {_TEXT_PRIMARY}; font-size: 11px;")
+        lbl_msg.setStyleSheet(f"color: palette(text); font-size: 11px;")
         lbl_msg.setWordWrap(False)
 
         lbl_ts = QLabel(timestamp)
@@ -207,13 +182,8 @@ class LogRow(QFrame):
         row.addWidget(lbl_msg, 1)
         row.addWidget(lbl_ts)
 
-
-# ─────────────────────────────────────────────
-# Section builders
-# ─────────────────────────────────────────────
-
-def _section_header(title: str, btn_label: str = None, btn_target: str = None,
-                    signal=None) -> QHBoxLayout:
+def _section_header(title: str, btn_label: Optional[str] = None, btn_target: Optional[str] = None,
+                    signal: Optional[Signal] = None) -> QHBoxLayout:
     hdr = QHBoxLayout()
     lbl = SectionLabel(title)
     hdr.addWidget(lbl)
@@ -222,18 +192,13 @@ def _section_header(title: str, btn_label: str = None, btn_target: str = None,
         btn = QPushButton(btn_label)
         btn.setStyleSheet(
             f"QPushButton {{ color: {_ACCENT_BLUE}; background: transparent; border: none; "
-            f"font-size: 11px; }} QPushButton:hover {{ color: #ffffff; }}"
+            f"font-size: 11px; }} QPushButton:hover {{ color: palette(text); }}"
         )
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         if btn_target:
             btn.clicked.connect(lambda: signal.emit(btn_target))
         hdr.addWidget(btn)
     return hdr
-
-
-# ─────────────────────────────────────────────
-# Main DashboardPage
-# ─────────────────────────────────────────────
 
 class DashboardPage(QWidget):
     """Complete, production-ready Dashboard."""
@@ -244,14 +209,11 @@ class DashboardPage(QWidget):
         super().__init__(parent)
         self.container = container
         self.setObjectName("DashboardPage")
-        self.setStyleSheet(f"QWidget#DashboardPage {{ background-color: #1e1e1e; }}")
 
-        # Auto-refresh timer (every 30s)
         self._timer = QTimer(self)
         self._timer.setInterval(30_000)
         self._timer.timeout.connect(self._refresh_state)
 
-        # Root layout → scroll area
         root_layout = QVBoxLayout(self)
         root_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -269,37 +231,25 @@ class DashboardPage(QWidget):
         self._scroll.setWidget(self._content)
         root_layout.addWidget(self._scroll)
 
-        # Build sections
         self._build_welcome_banner()
         self._build_quick_actions()
-
-        # Two-column grid
         self._build_stats_row()
-
-        # Recent items row
         self._build_recent_row()
-
-        # Bottom row: AI provider status + logs
         self._build_bottom_row()
-
         self._main_layout.addStretch()
 
-        # Connect events & initial load
         self._connect_events()
         self._refresh_state()
         self._timer.start()
 
-    # ─────────────────────── SECTION BUILDERS ────────────────────────
-
-    def _build_welcome_banner(self):
-        """Welcome Banner: greeting + workspace info or 'no workspace' prompt."""
+    def _build_welcome_banner(self) -> None:
         self._banner = CardFrame()
         self._banner.setMinimumHeight(100)
         self._banner.setStyleSheet(f"""
             QFrame {{
                 background: qlineargradient(
                     x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #1a3a5c, stop:1 #252526
+                    stop:0 {_ACCENT_BLUE}44, stop:1 palette(base)
                 );
                 border: 1px solid {_ACCENT_BLUE}44;
                 border-radius: 10px;
@@ -314,7 +264,7 @@ class DashboardPage(QWidget):
         col.setSpacing(4)
 
         self._lbl_greeting = QLabel("Welcome to StockPilot AI")
-        self._lbl_greeting.setStyleSheet("color: #ffffff; font-size: 20px; font-weight: bold; background: transparent; border: none;")
+        self._lbl_greeting.setStyleSheet("color: palette(text); font-size: 20px; font-weight: bold; background: transparent; border: none;")
 
         self._lbl_ws_info = QLabel("No workspace open — create or open one to get started.")
         self._lbl_ws_info.setStyleSheet(f"color: {_TEXT_MUTED}; font-size: 13px; background: transparent; border: none;")
@@ -330,7 +280,6 @@ class DashboardPage(QWidget):
 
         row.addLayout(col, 1)
 
-        # Banner buttons
         btn_col = QVBoxLayout()
         btn_col.setSpacing(8)
         btn_col.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
@@ -355,8 +304,7 @@ class DashboardPage(QWidget):
         row.addLayout(btn_col)
         self._main_layout.addWidget(self._banner)
 
-    def _build_quick_actions(self):
-        """Quick Actions — 6 buttons wired to real navigation targets."""
+    def _build_quick_actions(self) -> None:
         hdr = _section_header("Quick Actions")
         self._main_layout.addLayout(hdr)
 
@@ -387,15 +335,13 @@ class DashboardPage(QWidget):
 
         self._main_layout.addWidget(card)
 
-    def _build_stats_row(self):
-        """Workspace Statistics, Image Statistics, Metadata Statistics, Export Statistics."""
+    def _build_stats_row(self) -> None:
         hdr = _section_header("Statistics Overview")
         self._main_layout.addLayout(hdr)
 
         stats_row = QHBoxLayout()
         stats_row.setSpacing(12)
 
-        # Workspace stats
         ws_card = CardFrame()
         ws_col = QVBoxLayout(ws_card)
         ws_col.setContentsMargins(14, 12, 14, 12)
@@ -409,7 +355,6 @@ class DashboardPage(QWidget):
         ws_grid.addWidget(self._mc_active_ws, 0, 1)
         ws_col.addLayout(ws_grid)
 
-        # Image stats
         img_card = CardFrame()
         img_col = QVBoxLayout(img_card)
         img_col.setContentsMargins(14, 12, 14, 12)
@@ -427,7 +372,6 @@ class DashboardPage(QWidget):
         img_grid.addWidget(self._mc_img_pending, 1, 1)
         img_col.addLayout(img_grid)
 
-        # Metadata stats
         meta_card = CardFrame()
         meta_col = QVBoxLayout(meta_card)
         meta_col.setContentsMargins(14, 12, 14, 12)
@@ -441,7 +385,6 @@ class DashboardPage(QWidget):
         meta_grid.addWidget(self._mc_meta_pending, 0, 1)
         meta_col.addLayout(meta_grid)
 
-        # Export / Today Activity
         exp_card = CardFrame()
         exp_col = QVBoxLayout(exp_card)
         exp_col.setContentsMargins(14, 12, 14, 12)
@@ -465,30 +408,25 @@ class DashboardPage(QWidget):
         stats_row.addWidget(exp_card, 2)
         self._main_layout.addLayout(stats_row)
 
-    def _build_recent_row(self):
-        """Recent Workspaces · Recent Images · Recent Metadata · Recent Export."""
+    def _build_recent_row(self) -> None:
         hdr = _section_header("Recent Activity")
         self._main_layout.addLayout(hdr)
 
         row = QHBoxLayout()
         row.setSpacing(12)
 
-        # Recent Workspaces
         rw_card = self._make_list_card("Recent Workspaces", "workspaces")
         self._list_recent_ws = rw_card["list"]
         row.addWidget(rw_card["frame"], 1)
 
-        # Recent Images
         ri_card = self._make_list_card("Recent Images", "images")
         self._list_recent_img = ri_card["list"]
         row.addWidget(ri_card["frame"], 1)
 
-        # Recent Metadata
         rm_card = self._make_list_card("Recent Metadata", "metadata")
         self._list_recent_meta = rm_card["list"]
         row.addWidget(rm_card["frame"], 1)
 
-        # Recent Exports
         re_card = self._make_list_card("Recent Exports", "export")
         self._list_recent_export = re_card["list"]
         row.addWidget(re_card["frame"], 1)
@@ -508,7 +446,7 @@ class DashboardPage(QWidget):
         btn = QPushButton("View All")
         btn.setStyleSheet(
             f"QPushButton {{ color: {_ACCENT_BLUE}; background: transparent; border: none; "
-            f"font-size: 10px; }} QPushButton:hover {{ color: #ffffff; }}"
+            f"font-size: 10px; }} QPushButton:hover {{ color: palette(text); }}"
         )
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.clicked.connect(lambda _, t=nav_target: self.action_requested.emit(t))
@@ -520,15 +458,16 @@ class DashboardPage(QWidget):
             QListWidget {{
                 background: transparent;
                 border: none;
-                color: {_TEXT_PRIMARY};
+                color: palette(text);
                 font-size: 12px;
             }}
             QListWidget::item {{
                 padding: 5px 4px;
-                border-bottom: 1px solid {_BORDER}44;
+                border-bottom: 1px solid palette(alternate-base);
             }}
             QListWidget::item:hover {{
-                background-color: {_BG_CARD2};
+                background-color: palette(highlight);
+                color: palette(highlighted-text);
                 border-radius: 4px;
             }}
         """)
@@ -536,12 +475,10 @@ class DashboardPage(QWidget):
         col.addWidget(lst)
         return {"frame": frame, "list": lst}
 
-    def _build_bottom_row(self):
-        """AI Provider Status (left) + Recent Logs (right)."""
+    def _build_bottom_row(self) -> None:
         row = QHBoxLayout()
         row.setSpacing(12)
 
-        # AI Provider Status
         ai_frame = CardFrame()
         ai_frame.setMinimumHeight(180)
         ai_col = QVBoxLayout(ai_frame)
@@ -554,7 +491,7 @@ class DashboardPage(QWidget):
         btn_ai_studio = QPushButton("AI Studio →")
         btn_ai_studio.setStyleSheet(
             f"QPushButton {{ color: {_ACCENT_BLUE}; background: transparent; border: none; "
-            f"font-size: 10px; }} QPushButton:hover {{ color: #ffffff; }}"
+            f"font-size: 10px; }} QPushButton:hover {{ color: palette(text); }}"
         )
         btn_ai_studio.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_ai_studio.clicked.connect(lambda: self.action_requested.emit("ai_studio"))
@@ -567,7 +504,6 @@ class DashboardPage(QWidget):
         ai_col.addStretch()
         row.addWidget(ai_frame, 1)
 
-        # Recent Logs
         log_frame = CardFrame()
         log_frame.setMinimumHeight(180)
         log_col = QVBoxLayout(log_frame)
@@ -580,7 +516,7 @@ class DashboardPage(QWidget):
         btn_logs = QPushButton("View All →")
         btn_logs.setStyleSheet(
             f"QPushButton {{ color: {_ACCENT_BLUE}; background: transparent; border: none; "
-            f"font-size: 10px; }} QPushButton:hover {{ color: #ffffff; }}"
+            f"font-size: 10px; }} QPushButton:hover {{ color: palette(text); }}"
         )
         btn_logs.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_logs.clicked.connect(lambda: self.action_requested.emit("logs"))
@@ -594,8 +530,6 @@ class DashboardPage(QWidget):
         row.addWidget(log_frame, 2)
 
         self._main_layout.addLayout(row)
-
-    # ─────────────────────── EVENT WIRING ────────────────────────
 
     def _connect_events(self) -> None:
         if not self.container:
@@ -622,8 +556,6 @@ class DashboardPage(QWidget):
         self._refresh_state()
         super().showEvent(event)
 
-    # ─────────────────────── FULL REFRESH ────────────────────────
-
     def _refresh_state(self) -> None:
         try:
             self._refresh_banner()
@@ -640,8 +572,6 @@ class DashboardPage(QWidget):
             self._refresh_logs()
         except Exception as e:
             logger.error(f"DashboardPage._refresh_state error: {e}", exc_info=True)
-
-    # ─────────────────────── BANNER ────────────────────────
 
     def _refresh_banner(self) -> None:
         hour = datetime.now().hour
@@ -671,8 +601,6 @@ class DashboardPage(QWidget):
             self._lbl_ws_info.setText("No workspace open. Create or open one to get started.")
             self._lbl_ws_path.hide()
 
-    # ─────────────────────── WORKSPACE STATS ────────────────────────
-
     def _refresh_workspace_stats(self) -> None:
         wm = self._get_service("workspace_manager")
         if not wm:
@@ -683,8 +611,6 @@ class DashboardPage(QWidget):
             self._mc_active_ws.set_value(wm.active_workspace.name[:18])
         else:
             self._mc_active_ws.set_value("None")
-
-    # ─────────────────────── IMAGE STATS ────────────────────────
 
     def _refresh_image_stats(self) -> None:
         im = self._get_service("image_manager")
@@ -709,8 +635,6 @@ class DashboardPage(QWidget):
         self._mc_img_formats.set_value(str(formats))
         self._mc_img_pending.set_value(str(pending))
 
-    # ─────────────────────── METADATA STATS ────────────────────────
-
     def _refresh_metadata_stats(self) -> None:
         wm = self._get_service("workspace_manager")
         im = self._get_service("image_manager")
@@ -726,16 +650,12 @@ class DashboardPage(QWidget):
         self._mc_meta_generated.set_value(str(generated))
         self._mc_meta_pending.set_value(str(pending))
 
-    # ─────────────────────── EXPORT STATS ────────────────────────
-
     def _refresh_export_stats(self) -> None:
         exports_dir = AppConstants.EXPORTS_DIR
         total = 0
         if exports_dir.exists():
             total = sum(1 for f in exports_dir.rglob("*") if f.is_file())
         self._mc_exports_total.set_value(str(total))
-
-    # ─────────────────────── TODAY'S ACTIVITY ────────────────────────
 
     def _refresh_today_activity(self) -> None:
         today_str = date.today().isoformat()
@@ -769,8 +689,6 @@ class DashboardPage(QWidget):
         self._mc_today_generated.set_value(str(generated_today))
         self._mc_today_exported.set_value(str(exported_today))
 
-    # ─────────────────────── RECENT LISTS ────────────────────────
-
     def _refresh_recent_workspaces(self) -> None:
         self._list_recent_ws.clear()
         wm = self._get_service("workspace_manager")
@@ -784,14 +702,9 @@ class DashboardPage(QWidget):
             return
         for ws in recent[:8]:
             name = ws.get("name", "Unknown")
-            market = ws.get("marketplace", "")
-            last = ws.get("last_opened", "")[:10] if ws.get("last_opened") else ""
-            text = name
-            item = QListWidgetItem(text)
+            item = QListWidgetItem(name)
             item.setToolTip(ws.get("path", ""))
-            item.setForeground(QColor(_TEXT_PRIMARY))
             self._list_recent_ws.addItem(item)
-            # Clickable: load workspace
             item.setData(Qt.ItemDataRole.UserRole, ws.get("path", ""))
 
         self._list_recent_ws.itemClicked.connect(self._on_recent_ws_clicked)
@@ -806,7 +719,6 @@ class DashboardPage(QWidget):
         if not images:
             self._list_empty(self._list_recent_img, "No images indexed")
             return
-        # Sort by imported_date descending
         try:
             images.sort(key=lambda x: str(x.imported_date or ""), reverse=True)
         except Exception:
@@ -815,7 +727,6 @@ class DashboardPage(QWidget):
             size_kb = round(img.file_size_bytes / 1024, 0) if img.file_size_bytes else 0
             label = f"{img.filename}  ({img.format}, {size_kb} KB)"
             item = QListWidgetItem(label)
-            item.setForeground(QColor(_TEXT_PRIMARY))
             item.setToolTip(img.absolute_path)
             self._list_recent_img.addItem(item)
 
@@ -837,7 +748,6 @@ class DashboardPage(QWidget):
             pass
         for img in done[:8]:
             item = QListWidgetItem(img.filename)
-            item.setForeground(QColor(_TEXT_PRIMARY))
             item.setToolTip(f"Status: {img.status}")
             self._list_recent_meta.addItem(item)
 
@@ -858,14 +768,10 @@ class DashboardPage(QWidget):
         for f in files[:8]:
             size_kb = round(f.stat().st_size / 1024, 0)
             item = QListWidgetItem(f"{f.name}  ({size_kb} KB)")
-            item.setForeground(QColor(_TEXT_PRIMARY))
             item.setToolTip(str(f))
             self._list_recent_export.addItem(item)
 
-    # ─────────────────────── AI PROVIDER STATUS ────────────────────────
-
     def _refresh_ai_providers(self) -> None:
-        # Clear old rows
         while self._ai_providers_container.count():
             item = self._ai_providers_container.takeAt(0)
             if item.widget():
@@ -873,12 +779,9 @@ class DashboardPage(QWidget):
 
         config_manager = self._get_service("config_manager")
         if not config_manager:
-            self._ai_providers_container.addWidget(
-                QLabel("Config manager unavailable")
-            )
+            self._ai_providers_container.addWidget(QLabel("Config manager unavailable"))
             return
 
-        # Provider names → config key
         providers = [
             ("OpenAI",       "openai_api_key"),
             ("Gemini",       "gemini_api_key"),
@@ -899,7 +802,7 @@ class DashboardPage(QWidget):
 
             dot = StatusDot(is_configured)
             lbl_name = QLabel(name)
-            lbl_name.setStyleSheet(f"color: {_TEXT_PRIMARY}; font-size: 12px;")
+            lbl_name.setStyleSheet(f"color: palette(text); font-size: 12px;")
             lbl_status = QLabel("Configured" if is_configured else "Not configured")
             lbl_status.setStyleSheet(
                 f"color: {_ACCENT_GREEN if is_configured else _TEXT_MUTED}; font-size: 11px;"
@@ -918,20 +821,16 @@ class DashboardPage(QWidget):
             lbl.setStyleSheet(f"color: {_TEXT_MUTED}; font-size: 12px;")
             self._ai_providers_container.addWidget(lbl)
 
-        # Settings shortcut
         btn_cfg = QPushButton("Configure Providers →")
         btn_cfg.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_cfg.setStyleSheet(
             f"QPushButton {{ color: {_ACCENT_BLUE}; background: transparent; border: none; "
-            f"font-size: 11px; text-align: left; }} QPushButton:hover {{ color: #ffffff; }}"
+            f"font-size: 11px; text-align: left; }} QPushButton:hover {{ color: palette(text); }}"
         )
         btn_cfg.clicked.connect(lambda: self.action_requested.emit("settings"))
         self._ai_providers_container.addWidget(btn_cfg)
 
-    # ─────────────────────── RECENT LOGS ────────────────────────
-
     def _refresh_logs(self) -> None:
-        # Clear existing
         while self._logs_container.count():
             item = self._logs_container.takeAt(0)
             if item.widget():
@@ -948,17 +847,12 @@ class DashboardPage(QWidget):
             row = LogRow(level, message, timestamp)
             self._logs_container.addWidget(row)
 
-    def _read_recent_log_lines(self, max_lines: int = 10):
-        """
-        Reads the most recent log entries from the app log file.
-        Returns list of (level, message, timestamp).
-        """
+    def _read_recent_log_lines(self, max_lines: int = 10) -> List[Tuple[str, str, str]]:
         entries = []
         logs_dir = AppConstants.LOGS_DIR
         if not logs_dir.exists():
             return entries
 
-        # Find the most recently modified log file
         log_files = sorted(
             (f for f in logs_dir.glob("*.log") if f.is_file()),
             key=lambda f: f.stat().st_mtime,
@@ -967,19 +861,15 @@ class DashboardPage(QWidget):
         if not log_files:
             return entries
 
-        log_file = log_files[0]
         try:
-            with open(log_file, "r", encoding="utf-8", errors="replace") as f:
+            with open(log_files[0], "r", encoding="utf-8", errors="replace") as f:
                 lines = f.readlines()
         except Exception:
             return entries
 
-        # Parse last N non-empty lines
-        # Typical format: 2026-06-26 21:00:00,123 [INFO] module: message
         recent = [l.strip() for l in reversed(lines) if l.strip()][:max_lines]
         for line in recent:
             try:
-                # Try to extract timestamp and level
                 level = "INFO"
                 timestamp = ""
                 message = line
@@ -990,12 +880,10 @@ class DashboardPage(QWidget):
                 elif "[DEBUG]" in line or " DEBUG " in line:
                     level = "DEBUG"
 
-                # Extract timestamp (first 23 chars if it looks like a date)
                 if len(line) > 23 and line[4] == "-":
                     timestamp = line[:19]
                     message = line[24:].strip() if len(line) > 24 else line
 
-                # Truncate long messages
                 if len(message) > 80:
                     message = message[:77] + "..."
 
@@ -1004,8 +892,6 @@ class DashboardPage(QWidget):
                 continue
 
         return entries
-
-    # ─────────────────────── QUICK ACTIONS ────────────────────────
 
     def _action_open_workspace(self) -> None:
         folder = QFileDialog.getExistingDirectory(self, "Open Workspace Directory")
@@ -1029,7 +915,7 @@ class DashboardPage(QWidget):
             return
         files, _ = QFileDialog.getOpenFileNames(
             self, "Import Images", "",
-            "Image Files (*.png *.jpg *.jpeg *.webp *.tiff *.bmp *.gif)"
+            "Image Files (*.png *.jpg *.jpeg *.webp *.tiff *.bmp)"
         )
         if files:
             im = self._get_service("image_manager")
@@ -1049,9 +935,7 @@ class DashboardPage(QWidget):
                 QMessageBox.warning(self, "Load Failed",
                     f"Could not open workspace:\n{path}")
 
-    # ─────────────────────── UTILITIES ────────────────────────
-
-    def _get_service(self, name: str):
+    def _get_service(self, name: str) -> Any:
         if not self.container:
             return None
         return self.container.get_service(name)
@@ -1064,8 +948,7 @@ class DashboardPage(QWidget):
         lst.addItem(item)
 
     @staticmethod
-    def _count_metadata_files(ws) -> int:
-        """Count generated metadata files in workspace."""
+    def _count_metadata_files(ws: Any) -> int:
         try:
             meta_dir = Path(ws.root_path) / "metadata"
             if meta_dir.exists():
