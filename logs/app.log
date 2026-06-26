@@ -281,3 +281,257 @@
 2026-06-27 01:27:09,870 [INFO] gui.navigation.page_router: Navigated to: analytics
 2026-06-27 01:29:13,996 [INFO] core.lifecycle: Executing shutdown sequence...
 2026-06-27 01:29:13,997 [INFO] core.lifecycle: Shutdown sequence complete.
+2026-06-27 02:01:10,037 [INFO] core.logger: Logging configured from JSON.
+2026-06-27 02:01:10,040 [INFO] core.lifecycle: Executing startup sequence...
+2026-06-27 02:01:10,042 [INFO] core.config_manager: Configuration loaded successfully.
+2026-06-27 02:01:10,042 [INFO] core.lifecycle: Startup sequence complete.
+2026-06-27 02:01:10,045 [INFO] processing.batch_manager: BatchManager initialized.
+2026-06-27 02:01:10,045 [INFO] __main__: StockPilot AI core initialized successfully. Launching GUI...
+2026-06-27 02:01:10,046 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 02:01:10,048 [INFO] gui.widgets.splash_screen: Splash screen initialized.
+2026-06-27 02:01:13,618 [ERROR] gui.main_window: Failed to load page 'ai_studio': AIStudioPage.__init__() got multiple values for argument 'parent'
+Traceback (most recent call last):
+  File "D:\StockPilot AI\gui\main_window.py", line 126, in safe_register
+    page_instance = page_class(self.container, parent=self) if self.container else page_class(parent=self)
+                    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: AIStudioPage.__init__() got multiple values for argument 'parent'
+2026-06-27 02:01:13,622 [WARNING] gui.navigation.page_router: Page 'ai_studio' is already registered. Overwriting.
+2026-06-27 02:01:13,626 [INFO] gui.navigation.page_router: Navigated to: welcome
+2026-06-27 02:01:13,790 [INFO] gui.main_window: Main Window initialized.
+2026-06-27 02:01:14,090 [INFO] gui.app: GUI event loop started.
+2026-06-27 02:01:15,431 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 02:03:48,119 [INFO] core.logger: Logging configured from JSON.
+2026-06-27 02:03:48,122 [INFO] core.lifecycle: Executing startup sequence...
+2026-06-27 02:03:48,123 [INFO] core.config_manager: Configuration loaded successfully.
+2026-06-27 02:03:48,124 [INFO] core.lifecycle: Startup sequence complete.
+2026-06-27 02:03:48,126 [INFO] processing.batch_manager: BatchManager initialized.
+2026-06-27 02:03:48,127 [INFO] __main__: StockPilot AI core initialized successfully. Launching GUI...
+2026-06-27 02:03:48,128 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 02:03:48,130 [INFO] gui.widgets.splash_screen: Splash screen initialized.
+2026-06-27 02:03:52,118 [ERROR] gui.main_window: Failed to load page 'ai_studio': AIStudioPage.__init__() got multiple values for argument 'parent'
+Traceback (most recent call last):
+  File "D:\StockPilot AI\gui\main_window.py", line 126, in safe_register
+    page_instance = page_class(self.container, parent=self) if self.container else page_class(parent=self)
+                    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: AIStudioPage.__init__() got multiple values for argument 'parent'
+2026-06-27 02:03:52,142 [WARNING] gui.navigation.page_router: Page 'ai_studio' is already registered. Overwriting.
+2026-06-27 02:03:52,179 [INFO] gui.navigation.page_router: Navigated to: welcome
+2026-06-27 02:03:52,333 [INFO] gui.main_window: Main Window initialized.
+2026-06-27 02:03:52,604 [INFO] gui.app: GUI event loop started.
+2026-06-27 02:03:54,079 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 02:03:55,033 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:03:56,278 [INFO] gui.navigation.page_router: Navigated to: seo
+2026-06-27 02:03:56,733 [INFO] gui.navigation.page_router: Navigated to: export
+2026-06-27 02:03:57,230 [INFO] gui.navigation.page_router: Navigated to: history
+2026-06-27 02:03:57,761 [INFO] gui.navigation.page_router: Navigated to: analytics
+2026-06-27 02:03:58,760 [INFO] gui.navigation.page_router: Navigated to: settings
+2026-06-27 02:04:05,862 [INFO] gui.navigation.page_router: Navigated to: export
+2026-06-27 02:04:06,286 [INFO] gui.navigation.page_router: Navigated to: history
+2026-06-27 02:04:07,246 [INFO] gui.navigation.page_router: Navigated to: plugins
+2026-06-27 02:04:08,073 [INFO] gui.navigation.page_router: Navigated to: logs
+2026-06-27 02:04:08,478 [INFO] gui.navigation.page_router: Navigated to: help
+2026-06-27 02:04:09,264 [INFO] gui.navigation.page_router: Navigated to: seo
+2026-06-27 02:04:09,710 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 02:04:10,214 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:04:10,633 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 02:04:11,312 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 02:04:12,178 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 02:04:13,300 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 02:04:14,743 [INFO] workspace.workspace_loader: Successfully loaded workspace: Demo 1
+2026-06-27 02:04:14,854 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 02:04:14,855 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 02:04:14,864 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 02:04:14,932 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 02:04:14,935 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 02:04:14,944 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 02:04:14,950 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 02:04:16,941 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 02:04:18,969 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 02:04:23,669 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:04:24,431 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 02:04:30,370 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 02:05:04,017 [INFO] core.lifecycle: Executing shutdown sequence...
+2026-06-27 02:05:04,017 [INFO] core.lifecycle: Shutdown sequence complete.
+2026-06-27 02:05:13,272 [INFO] core.logger: Logging configured from JSON.
+2026-06-27 02:05:13,275 [INFO] core.lifecycle: Executing startup sequence...
+2026-06-27 02:05:13,276 [INFO] core.config_manager: Configuration loaded successfully.
+2026-06-27 02:05:13,276 [INFO] core.lifecycle: Startup sequence complete.
+2026-06-27 02:05:13,279 [INFO] processing.batch_manager: BatchManager initialized.
+2026-06-27 02:05:13,280 [INFO] __main__: StockPilot AI core initialized successfully. Launching GUI...
+2026-06-27 02:05:13,284 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 02:05:13,286 [INFO] gui.widgets.splash_screen: Splash screen initialized.
+2026-06-27 02:05:16,808 [ERROR] gui.main_window: Failed to load page 'ai_studio': AIStudioPage.__init__() got multiple values for argument 'parent'
+Traceback (most recent call last):
+  File "D:\StockPilot AI\gui\main_window.py", line 126, in safe_register
+    page_instance = page_class(self.container, parent=self) if self.container else page_class(parent=self)
+                    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: AIStudioPage.__init__() got multiple values for argument 'parent'
+2026-06-27 02:05:16,812 [INFO] gui.navigation.page_router: Navigated to: welcome
+2026-06-27 02:05:16,921 [INFO] gui.main_window: Main Window initialized.
+2026-06-27 02:05:17,176 [INFO] gui.app: GUI event loop started.
+2026-06-27 02:05:18,610 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 02:05:24,348 [INFO] gui.navigation.page_router: Navigated to: seo
+2026-06-27 02:05:24,970 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 02:05:25,588 [INFO] gui.navigation.page_router: Navigated to: seo
+2026-06-27 02:05:26,196 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 02:05:28,790 [INFO] core.lifecycle: Executing shutdown sequence...
+2026-06-27 02:05:28,791 [INFO] core.lifecycle: Shutdown sequence complete.
+2026-06-27 02:16:09,809 [INFO] core.logger: Logging configured from JSON.
+2026-06-27 02:16:09,812 [INFO] core.lifecycle: Executing startup sequence...
+2026-06-27 02:16:09,813 [INFO] core.config_manager: Configuration loaded successfully.
+2026-06-27 02:16:09,814 [INFO] core.lifecycle: Startup sequence complete.
+2026-06-27 02:16:09,817 [INFO] processing.batch_manager: BatchManager initialized.
+2026-06-27 02:16:09,817 [INFO] __main__: StockPilot AI core initialized successfully. Launching GUI...
+2026-06-27 02:16:09,820 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 02:16:09,822 [INFO] gui.widgets.splash_screen: Splash screen initialized.
+2026-06-27 02:16:13,236 [ERROR] gui.main_window: Failed to load page 'ai_studio': AIStudioPage.__init__() got multiple values for argument 'parent'
+Traceback (most recent call last):
+  File "D:\StockPilot AI\gui\main_window.py", line 127, in safe_register
+    page_instance = page_class(self.container, parent=self) if self.container else page_class(parent=self)
+                    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: AIStudioPage.__init__() got multiple values for argument 'parent'
+2026-06-27 02:16:13,325 [INFO] gui.navigation.page_router: Navigated to: welcome
+2026-06-27 02:16:13,485 [INFO] gui.main_window: Main Window initialized.
+2026-06-27 02:16:13,762 [INFO] gui.app: GUI event loop started.
+2026-06-27 02:16:53,462 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:17:10,370 [INFO] gui.pages.metadata_page: Initiating metadata generation...
+2026-06-27 02:18:00,202 [INFO] gui.pages.metadata_page: Resetting metadata to last saved state...
+2026-06-27 02:18:04,927 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 02:18:12,159 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 02:18:14,310 [INFO] workspace.workspace_loader: Successfully loaded workspace: Demo 1
+2026-06-27 02:18:14,447 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 02:18:14,449 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 02:18:14,457 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 02:18:14,516 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 02:18:14,520 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 02:18:14,529 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 02:18:14,536 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 02:18:17,352 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:18:27,778 [INFO] gui.pages.metadata_page: Initiating metadata generation...
+2026-06-27 02:19:08,827 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 02:19:09,613 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 02:19:19,552 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:19:21,639 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 02:19:23,038 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:20:03,397 [INFO] gui.navigation.page_router: Navigated to: settings
+2026-06-27 02:20:11,666 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 02:20:11,708 [INFO] gui.pages.settings_page: Settings applied by user.
+2026-06-27 02:20:13,321 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 02:20:13,359 [INFO] gui.pages.settings_page: Settings applied by user.
+2026-06-27 02:20:15,509 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:20:18,850 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 02:20:35,181 [INFO] gui.navigation.page_router: Navigated to: export
+2026-06-27 02:20:35,603 [INFO] gui.navigation.page_router: Navigated to: seo
+2026-06-27 02:20:36,051 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 02:20:36,774 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:22:40,819 [INFO] core.lifecycle: Executing shutdown sequence...
+2026-06-27 02:22:40,820 [INFO] core.lifecycle: Shutdown sequence complete.
+2026-06-27 02:22:49,974 [INFO] core.logger: Logging configured from JSON.
+2026-06-27 02:22:49,977 [INFO] core.lifecycle: Executing startup sequence...
+2026-06-27 02:22:50,002 [INFO] core.config_manager: Configuration loaded successfully.
+2026-06-27 02:22:50,003 [INFO] core.lifecycle: Startup sequence complete.
+2026-06-27 02:22:50,008 [INFO] processing.batch_manager: BatchManager initialized.
+2026-06-27 02:22:50,012 [INFO] __main__: StockPilot AI core initialized successfully. Launching GUI...
+2026-06-27 02:22:50,017 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 02:22:50,020 [INFO] gui.widgets.splash_screen: Splash screen initialized.
+2026-06-27 02:22:53,812 [ERROR] gui.main_window: Failed to load page 'ai_studio': AIStudioPage.__init__() got multiple values for argument 'parent'
+Traceback (most recent call last):
+  File "D:\StockPilot AI\gui\main_window.py", line 127, in safe_register
+    page_instance = page_class(self.container, parent=self) if self.container else page_class(parent=self)
+                    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: AIStudioPage.__init__() got multiple values for argument 'parent'
+2026-06-27 02:22:53,844 [INFO] gui.navigation.page_router: Navigated to: welcome
+2026-06-27 02:22:53,971 [INFO] gui.main_window: Main Window initialized.
+2026-06-27 02:22:54,240 [INFO] gui.app: GUI event loop started.
+2026-06-27 02:22:57,350 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 02:22:58,968 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:25:48,869 [INFO] core.lifecycle: Executing shutdown sequence...
+2026-06-27 02:25:48,870 [INFO] core.lifecycle: Shutdown sequence complete.
+2026-06-27 02:25:58,050 [INFO] core.logger: Logging configured from JSON.
+2026-06-27 02:25:58,053 [INFO] core.lifecycle: Executing startup sequence...
+2026-06-27 02:25:58,054 [INFO] core.config_manager: Configuration loaded successfully.
+2026-06-27 02:25:58,055 [INFO] core.lifecycle: Startup sequence complete.
+2026-06-27 02:25:58,058 [INFO] processing.batch_manager: BatchManager initialized.
+2026-06-27 02:25:58,059 [INFO] __main__: StockPilot AI core initialized successfully. Launching GUI...
+2026-06-27 02:25:58,062 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 02:25:58,065 [INFO] gui.widgets.splash_screen: Splash screen initialized.
+2026-06-27 02:26:01,814 [INFO] gui.pages.ai_studio_page: AI Studio initialized and ready.
+2026-06-27 02:26:01,854 [INFO] gui.navigation.page_router: Navigated to: welcome
+2026-06-27 02:26:02,060 [INFO] gui.main_window: Main Window initialized.
+2026-06-27 02:26:02,378 [INFO] gui.app: GUI event loop started.
+2026-06-27 02:26:03,866 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 02:26:07,525 [INFO] gui.pages.ai_studio_page: Provider switched to Gemini. Available models loaded.
+2026-06-27 02:26:08,746 [INFO] gui.pages.ai_studio_page: Provider switched to OpenAI. Available models loaded.
+2026-06-27 02:26:18,145 [INFO] gui.pages.ai_studio_page: Provider switched to Groq. Available models loaded.
+2026-06-27 02:26:26,154 [INFO] gui.pages.ai_studio_page: Loaded template: Title & Description Generator
+2026-06-27 02:26:31,204 [INFO] gui.pages.ai_studio_page: Initiating generation with Groq (llama3-70b-8192)...
+2026-06-27 02:28:10,822 [INFO] gui.navigation.page_router: Navigated to: plugins
+2026-06-27 02:28:11,863 [INFO] gui.navigation.page_router: Navigated to: settings
+2026-06-27 02:28:14,339 [INFO] gui.navigation.page_router: Navigated to: analytics
+2026-06-27 02:28:14,736 [INFO] gui.navigation.page_router: Navigated to: history
+2026-06-27 02:28:15,138 [INFO] gui.navigation.page_router: Navigated to: export
+2026-06-27 02:28:15,505 [INFO] gui.navigation.page_router: Navigated to: seo
+2026-06-27 02:28:15,807 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 02:28:47,828 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 02:28:55,520 [INFO] workspace.workspace_loader: Successfully loaded workspace: Demo 1
+2026-06-27 02:28:55,640 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 02:28:55,641 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 02:28:55,653 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 02:28:55,767 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 02:28:55,774 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 02:28:55,795 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 02:28:55,809 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 02:29:29,475 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:29:32,454 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 02:29:37,407 [INFO] gui.pages.ai_studio_page: Execution interrupted by user.
+2026-06-27 02:29:41,855 [INFO] gui.pages.ai_studio_page: Initiating generation with Groq (llama3-70b-8192)...
+2026-06-27 02:32:13,405 [INFO] core.logger: Logging configured from JSON.
+2026-06-27 02:32:13,408 [INFO] core.lifecycle: Executing startup sequence...
+2026-06-27 02:32:13,409 [INFO] core.config_manager: Configuration loaded successfully.
+2026-06-27 02:32:13,409 [INFO] core.lifecycle: Startup sequence complete.
+2026-06-27 02:32:13,412 [INFO] processing.batch_manager: BatchManager initialized.
+2026-06-27 02:32:13,412 [INFO] __main__: StockPilot AI core initialized successfully. Launching GUI...
+2026-06-27 02:32:13,413 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 02:32:13,415 [INFO] gui.widgets.splash_screen: Splash screen initialized.
+2026-06-27 02:32:16,747 [INFO] gui.pages.ai_studio_page: AI Studio initialized and ready.
+2026-06-27 02:32:16,766 [INFO] gui.navigation.page_router: Navigated to: welcome
+2026-06-27 02:32:16,897 [INFO] gui.main_window: Main Window initialized.
+2026-06-27 02:32:17,173 [INFO] gui.app: GUI event loop started.
+2026-06-27 02:32:21,561 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:32:22,242 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 02:32:23,210 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:32:36,352 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 02:32:38,394 [INFO] workspace.workspace_loader: Successfully loaded workspace: Demo 1
+2026-06-27 02:32:38,514 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 02:32:38,515 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 02:32:38,525 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 02:32:38,596 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 02:32:38,600 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 02:32:38,609 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 02:32:38,616 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 02:32:40,280 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 02:32:41,665 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:32:51,197 [INFO] gui.pages.metadata_page: Running compliance review...
+2026-06-27 02:33:10,776 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 02:33:15,415 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 02:33:16,192 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 02:33:20,197 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 02:40:07,132 [INFO] core.logger: Logging configured from JSON.
+2026-06-27 02:40:07,137 [INFO] core.lifecycle: Executing startup sequence...
+2026-06-27 02:40:07,138 [INFO] core.config_manager: Configuration loaded successfully.
+2026-06-27 02:40:07,138 [INFO] core.lifecycle: Startup sequence complete.
+2026-06-27 02:40:07,142 [INFO] processing.batch_manager: BatchManager initialized.
+2026-06-27 02:40:07,142 [INFO] __main__: StockPilot AI core initialized successfully. Launching GUI...
+2026-06-27 02:40:07,144 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 02:40:07,147 [INFO] gui.widgets.splash_screen: Splash screen initialized.
+2026-06-27 02:40:09,613 [INFO] gui.pages.settings_page: Loading settings into UI...
+2026-06-27 02:40:09,629 [INFO] gui.pages.plugin_page: Loading plugin data...
+2026-06-27 02:40:09,692 [INFO] gui.pages.ai_studio_page: AI Studio initialized and ready.
+2026-06-27 02:40:09,711 [INFO] gui.navigation.page_router: Navigated to: welcome
+2026-06-27 02:40:10,317 [INFO] gui.main_window: Main Window initialized.
+2026-06-27 02:40:10,582 [INFO] gui.app: GUI event loop started.
+2026-06-27 02:40:12,235 [INFO] gui.navigation.page_router: Navigated to: settings
+2026-06-27 02:41:06,277 [INFO] gui.navigation.page_router: Navigated to: analytics
+2026-06-27 02:41:06,943 [INFO] gui.navigation.page_router: Navigated to: settings
+2026-06-27 02:41:42,880 [INFO] core.lifecycle: Executing shutdown sequence...
+2026-06-27 02:41:42,882 [INFO] core.lifecycle: Shutdown sequence complete.
