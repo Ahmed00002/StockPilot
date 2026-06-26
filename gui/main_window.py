@@ -1,6 +1,7 @@
 # gui/main_window.py
 import logging
 import json
+import inspect
 from pathlib import Path
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
@@ -28,9 +29,15 @@ from gui.pages.about_page import AboutPage
 from gui.workspaces.workspace_home import WorkspaceHomePage
 from gui.pages.images_page import ImagesPage
 from gui.pages.ai_studio_page import AIStudioPage
-from image.image_events import ImageEvents
-from gui.pages.metadata_page import MetadataPage
 
+# Integration Modules
+from gui.workspace.metadata_workspace_view import MetadataWorkspaceView
+from gui.review.review_dashboard import ReviewDashboardWidget
+from gui.compliance.compliance_dashboard import ComplianceDashboardWidget
+from gui.integration.pipeline_dashboard import PipelineDashboardWidget
+from gui.integration.diagnostics_panel import DiagnosticsPanel
+
+from image.image_events import ImageEvents
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +120,7 @@ class MainWindow(QMainWindow):
     def _create_placeholder(self, module_name: str) -> QWidget:
         placeholder = QWidget()
         layout = QVBoxLayout(placeholder)
-        lbl = QLabel(f"Module '{module_name}' Pending Implementation")
+        lbl = QLabel(f"Module '{module_name}' Load Error")
         lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl.setStyleSheet("color: #858585; font-size: 16px;")
         layout.addWidget(lbl)
@@ -124,13 +131,18 @@ class MainWindow(QMainWindow):
         
         def safe_register(page_id: str, page_class, title: str) -> None:
             try:
-                page_instance = page_class(self.container, parent=self) if self.container else page_class(parent=self)
+                sig = inspect.signature(page_class.__init__)
+                if 'container' in sig.parameters:
+                    page_instance = page_class(container=self.container, parent=self)
+                else:
+                    page_instance = page_class(parent=self)
+                    
                 if hasattr(page_instance, "action_requested"):
                     page_instance.action_requested.connect(self.nav_manager.navigate)
                 self.nav_manager.register_page(page_id, page_instance, title)
             except Exception as e:
                 logger.error(f"Failed to load page '{page_id}': {e}", exc_info=True)
-                self.nav_manager.register_page(page_id, self._create_placeholder(f"{title} (Load Error)"), title)
+                self.nav_manager.register_page(page_id, self._create_placeholder(title), title)
 
         safe_register("welcome", WelcomePage, "Welcome")
         safe_register("dashboard", DashboardPage, "Dashboard")
@@ -141,17 +153,13 @@ class MainWindow(QMainWindow):
         safe_register("workspaces", WorkspaceHomePage, "Workspaces")
         safe_register("images", ImagesPage, "Images")
         safe_register("ai_studio", AIStudioPage, "AI Studio")
-        safe_register("metadata", MetadataPage, "Metadata Studio")
         
-        missing_modules = [
-            ("seo", "SEO Engine"),
-            ("export", "Export Center"), 
-            ("analytics", "Analytics"),
-            ("logs", "Logs")
-        ]
-        
-        for pid, title in missing_modules:
-            self.nav_manager.register_page(pid, self._create_placeholder(title), title)
+        # Integration Modules
+        safe_register("metadata", MetadataWorkspaceView, "Metadata Studio")
+        safe_register("seo", ReviewDashboardWidget, "SEO Engine")
+        safe_register("export", ComplianceDashboardWidget, "Export Center")
+        safe_register("analytics", PipelineDashboardWidget, "Analytics")
+        safe_register("logs", DiagnosticsPanel, "Logs")
         
         self.nav_manager.page_changed.connect(self._on_page_changed)
         self.nav_manager.navigate("welcome")
@@ -175,11 +183,29 @@ class MainWindow(QMainWindow):
         self.act_save = QAction(IconLoader.get_icon("save"), "Save Project State", self)
         self.act_export = QAction(IconLoader.get_icon("export"), "Export Data...", self)
         
+        self.act_metadata = QAction(IconLoader.get_icon("edit"), "Metadata Studio", self)
+        self.act_metadata.triggered.connect(lambda: self.nav_manager.navigate("metadata"))
+        
+        self.act_ai_studio = QAction(IconLoader.get_icon("cpu"), "AI Studio", self)
+        self.act_ai_studio.triggered.connect(lambda: self.nav_manager.navigate("ai_studio"))
+        
+        self.act_seo = QAction(IconLoader.get_icon("bar-chart"), "SEO Engine", self)
+        self.act_seo.triggered.connect(lambda: self.nav_manager.navigate("seo"))
+        
+        self.act_export_center = QAction(IconLoader.get_icon("export"), "Export Center", self)
+        self.act_export_center.triggered.connect(lambda: self.nav_manager.navigate("export"))
+
+        self.act_refresh = QAction(IconLoader.get_icon("refresh-cw"), "Refresh", self)
+        self.act_refresh.triggered.connect(self._refresh_action)
+        
         self.act_history = QAction(IconLoader.get_icon("history"), "History", self)
         self.act_history.triggered.connect(lambda: self.nav_manager.navigate("history"))
         
         self.act_settings = QAction(IconLoader.get_icon("settings"), "Settings", self)
         self.act_settings.triggered.connect(lambda: self.nav_manager.navigate("settings"))
+        
+        self.act_help = QAction(IconLoader.get_icon("help-circle"), "Help", self)
+        self.act_help.triggered.connect(lambda: self.nav_manager.navigate("help"))
         
         self.act_fullscreen = QAction("Toggle Fullscreen", self)
         self.act_fullscreen.triggered.connect(self._toggle_fullscreen)
@@ -192,6 +218,12 @@ class MainWindow(QMainWindow):
         
         self.act_command_palette = QAction("Command Palette", self)
         self.act_command_palette.triggered.connect(self._show_command_palette)
+
+    def _refresh_action(self) -> None:
+        if self.container:
+            eb = self.container.get_service("event_bus")
+            if eb:
+                eb.publish("refresh_requested", None)
 
     def _import_images_action(self) -> None:
         if not self.container: return
@@ -281,7 +313,8 @@ class MainWindow(QMainWindow):
         view_menu.addSeparator()
         view_menu.addAction(self.act_command_palette)
         
-        menu_bar.addMenu("&Help")
+        help_menu = menu_bar.addMenu("&Help")
+        help_menu.addAction(self.act_help)
 
     def _create_toolbar(self) -> None:
         toolbar = QToolBar("Main Toolbar", self)
@@ -293,7 +326,14 @@ class MainWindow(QMainWindow):
         toolbar.addSeparator()
         toolbar.addAction(self.act_new_workspace)
         toolbar.addAction(self.act_open)
+        toolbar.addAction(self.act_import)
         toolbar.addAction(self.act_save)
+        toolbar.addSeparator()
+        
+        toolbar.addAction(self.act_metadata)
+        toolbar.addAction(self.act_ai_studio)
+        toolbar.addAction(self.act_seo)
+        toolbar.addAction(self.act_export_center)
         
         spacer = QWidget()
         spacer.setSizePolicy(spacer.sizePolicy().Policy.Expanding, spacer.sizePolicy().Policy.Preferred)
@@ -303,20 +343,32 @@ class MainWindow(QMainWindow):
         toolbar.addWidget(self.search_box)
         
         toolbar.addSeparator()
+        toolbar.addAction(self.act_refresh)
         toolbar.addAction(self.act_settings)
+        toolbar.addAction(self.act_help)
 
     def _create_status_bar(self) -> None:
         status_bar = QStatusBar()
         self.setStatusBar(status_bar)
+        
         self.lbl_status = QLabel("Ready")
         self.lbl_workspace = QLabel("Workspace: None")
+        self.lbl_current_image = QLabel("Image: None")
+        self.lbl_metadata_status = QLabel("Metadata: N/A")
         self.lbl_provider = QLabel("Provider: None")
+        self.lbl_model = QLabel("Model: None")
+        self.lbl_tokens = QLabel("Tokens: 0")
         self.lbl_queue = QLabel("Images: 0")
         self.lbl_version = QLabel(f"v{AppConstants.APP_VERSION}")
+        
         status_bar.addWidget(self.lbl_status, 1)
         status_bar.addPermanentWidget(self.lbl_workspace)
-        status_bar.addPermanentWidget(self.lbl_provider)
         status_bar.addPermanentWidget(self.lbl_queue)
+        status_bar.addPermanentWidget(self.lbl_current_image)
+        status_bar.addPermanentWidget(self.lbl_metadata_status)
+        status_bar.addPermanentWidget(self.lbl_provider)
+        status_bar.addPermanentWidget(self.lbl_model)
+        status_bar.addPermanentWidget(self.lbl_tokens)
         status_bar.addPermanentWidget(self.lbl_version)
 
     def _subscribe_events(self) -> None:
@@ -326,6 +378,12 @@ class MainWindow(QMainWindow):
                 eb.subscribe(AppConstants.EVENT_WORKSPACE_LOADED, self._on_status_workspace_update)
                 eb.subscribe(ImageEvents.INDEXED, self._update_image_count)
                 eb.subscribe(ImageEvents.SCAN_COMPLETED, self._update_image_count)
+                
+                eb.subscribe(ImageEvents.SELECTION_CHANGED, self._on_image_selection_changed)
+                eb.subscribe("ai_provider_changed", self._on_provider_changed)
+                eb.subscribe("ai_model_changed", self._on_model_changed)
+                eb.subscribe("ai_token_usage_updated", self._on_token_usage_updated)
+                eb.subscribe("metadata_status_changed", self._on_metadata_status_changed)
 
     def _on_status_workspace_update(self, workspace_name=None) -> None:
         if workspace_name:
@@ -341,6 +399,24 @@ class MainWindow(QMainWindow):
             if im and im.repository:
                 count = len(im.repository.get_all())
                 self.lbl_queue.setText(f"Images: {count}")
+
+    def _on_image_selection_changed(self, image_ids):
+        if image_ids and len(image_ids) > 0:
+            self.lbl_current_image.setText(f"Image: {image_ids[0][:8]}")
+        else:
+            self.lbl_current_image.setText("Image: None")
+
+    def _on_provider_changed(self, provider_name: str):
+        self.lbl_provider.setText(f"Provider: {provider_name}")
+
+    def _on_model_changed(self, model_name: str):
+        self.lbl_model.setText(f"Model: {model_name}")
+
+    def _on_token_usage_updated(self, tokens: int):
+        self.lbl_tokens.setText(f"Tokens: {tokens}")
+
+    def _on_metadata_status_changed(self, status: str):
+        self.lbl_metadata_status.setText(f"Metadata: {status}")
 
     def _register_shortcuts(self) -> None:
         self.act_open.setShortcut(QKeySequence("Ctrl+O"))

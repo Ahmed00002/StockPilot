@@ -18,14 +18,14 @@ class NavigationManager(QObject):
         self.router = PageRouter(stack_widget)
         self.sidebar = sidebar
         self.breadcrumb = breadcrumb
+        self.titles = {}
         
         self.sidebar.navigation_requested.connect(self.navigate)
 
     def register_page(self, page_id: str, widget: QWidget, title: str) -> None:
         """Registers a page and stores its UI title mapping."""
         self.router.register_page(page_id, widget)
-        # In a full implementation, the title would be stored in a registry 
-        # to update the breadcrumb properly.
+        self.titles[page_id] = title
 
     def navigate(self, page_id: str) -> None:
         """Coordinates the UI transition across all navigation components."""
@@ -36,6 +36,5 @@ class NavigationManager(QObject):
 
     def _update_breadcrumb(self, page_id: str) -> None:
         """Translates the internal page_id to a displayable breadcrumb path."""
-        # Mock logic. Normally driven by a hierarchy map.
-        title = page_id.replace("_", " ").title()
+        title = self.titles.get(page_id, page_id.replace("_", " ").title())
         self.breadcrumb.set_path(["Workspace", title])
