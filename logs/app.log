@@ -129,3 +129,155 @@
 2026-06-26 23:51:47,759 [INFO] gui.navigation.page_router: Navigated to: workspaces
 2026-06-26 23:51:55,109 [INFO] gui.navigation.page_router: Navigated to: dashboard
 2026-06-26 23:52:21,367 [INFO] gui.navigation.page_router: Navigated to: settings
+2026-06-26 23:59:31,210 [INFO] core.logger: Logging configured from JSON.
+2026-06-26 23:59:31,212 [INFO] core.lifecycle: Executing startup sequence...
+2026-06-26 23:59:31,212 [INFO] core.config_manager: Configuration loaded successfully.
+2026-06-26 23:59:31,213 [INFO] core.lifecycle: Startup sequence complete.
+2026-06-26 23:59:31,214 [INFO] processing.batch_manager: BatchManager initialized.
+2026-06-26 23:59:31,214 [INFO] __main__: StockPilot AI core initialized successfully. Launching GUI...
+2026-06-26 23:59:31,215 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-26 23:59:31,216 [INFO] gui.widgets.splash_screen: Splash screen initialized.
+2026-06-26 23:59:33,570 [INFO] gui.navigation.page_router: Navigated to: welcome
+2026-06-26 23:59:33,625 [INFO] gui.main_window: Main Window initialized.
+2026-06-26 23:59:33,863 [INFO] gui.app: GUI event loop started.
+2026-06-26 23:59:36,458 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-26 23:59:36,867 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-26 23:59:40,894 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-26 23:59:43,142 [INFO] workspace.workspace_loader: Successfully loaded workspace: Demo 1
+2026-06-26 23:59:43,203 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-26 23:59:43,204 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-26 23:59:43,209 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-26 23:59:43,241 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-26 23:59:43,243 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-26 23:59:43,247 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-26 23:59:43,251 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-26 23:59:44,554 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 00:00:05,935 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 00:01:44,192 [INFO] gui.navigation.page_router: Navigated to: export
+2026-06-27 00:01:44,661 [INFO] gui.navigation.page_router: Navigated to: history
+2026-06-27 00:01:45,067 [INFO] gui.navigation.page_router: Navigated to: settings
+2026-06-27 00:01:46,706 [INFO] gui.navigation.page_router: Navigated to: plugins
+2026-06-27 00:01:47,610 [INFO] gui.navigation.page_router: Navigated to: logs
+2026-06-27 00:01:47,955 [INFO] gui.navigation.page_router: Navigated to: help
+2026-06-27 00:01:48,524 [INFO] gui.navigation.page_router: Navigated to: logs
+2026-06-27 00:01:48,988 [INFO] gui.navigation.page_router: Navigated to: analytics
+2026-06-27 00:01:49,351 [INFO] gui.navigation.page_router: Navigated to: history
+2026-06-27 00:01:49,717 [INFO] gui.navigation.page_router: Navigated to: export
+2026-06-27 00:01:50,089 [INFO] gui.navigation.page_router: Navigated to: seo
+2026-06-27 00:01:50,441 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 00:01:50,793 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 00:01:51,570 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 00:01:52,226 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 00:01:52,725 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 00:01:53,257 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 00:01:58,194 [INFO] workspace.workspace_backup: Workspace backup created successfully: C:\Users\UAE LAPTOP BAZAR\Downloads\test img\Demo 1\backups\workspace_backup_20260627_000158.zip
+2026-06-27 00:02:18,713 [INFO] core.logger: Logging configured from JSON.
+2026-06-27 00:02:18,714 [INFO] core.lifecycle: Executing startup sequence...
+2026-06-27 00:02:18,715 [INFO] core.config_manager: Configuration loaded successfully.
+2026-06-27 00:02:18,715 [INFO] core.lifecycle: Startup sequence complete.
+2026-06-27 00:02:18,716 [INFO] processing.batch_manager: BatchManager initialized.
+2026-06-27 00:02:18,716 [INFO] __main__: StockPilot AI core initialized successfully. Launching GUI...
+2026-06-27 00:02:18,717 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 00:02:18,718 [INFO] gui.widgets.splash_screen: Splash screen initialized.
+2026-06-27 00:02:21,170 [INFO] gui.navigation.page_router: Navigated to: welcome
+2026-06-27 00:02:21,223 [INFO] gui.main_window: Main Window initialized.
+2026-06-27 00:02:21,448 [INFO] gui.app: GUI event loop started.
+2026-06-27 00:02:24,717 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 00:02:26,640 [INFO] workspace.workspace_loader: Successfully loaded workspace: Demo 1
+2026-06-27 00:02:26,701 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 00:02:26,702 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 00:02:26,709 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 00:02:26,741 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 00:02:26,743 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 00:02:26,747 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 00:02:26,750 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 00:02:28,438 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 00:02:34,953 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 00:02:49,103 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 00:02:49,667 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 00:03:24,980 [INFO] gui.navigation.page_router: Navigated to: history
+2026-06-27 00:03:25,387 [INFO] gui.navigation.page_router: Navigated to: analytics
+2026-06-27 00:03:26,409 [INFO] gui.navigation.page_router: Navigated to: settings
+2026-06-27 00:03:27,613 [INFO] gui.navigation.page_router: Navigated to: plugins
+2026-06-27 00:03:29,196 [INFO] gui.navigation.page_router: Navigated to: export
+2026-06-27 00:03:29,680 [INFO] gui.navigation.page_router: Navigated to: seo
+2026-06-27 00:03:30,290 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 00:03:31,146 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 00:03:32,029 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 00:03:32,612 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 00:03:33,470 [INFO] gui.navigation.page_router: Navigated to: plugins
+2026-06-27 00:03:33,927 [INFO] gui.navigation.page_router: Navigated to: settings
+2026-06-27 00:03:34,909 [INFO] gui.navigation.page_router: Navigated to: analytics
+2026-06-27 00:03:35,297 [INFO] gui.navigation.page_router: Navigated to: history
+2026-06-27 00:09:06,633 [INFO] core.logger: Logging configured from JSON.
+2026-06-27 00:09:06,635 [INFO] core.lifecycle: Executing startup sequence...
+2026-06-27 00:09:06,635 [INFO] core.config_manager: Configuration loaded successfully.
+2026-06-27 00:09:06,635 [INFO] core.lifecycle: Startup sequence complete.
+2026-06-27 00:09:06,636 [INFO] processing.batch_manager: BatchManager initialized.
+2026-06-27 00:09:06,637 [INFO] __main__: StockPilot AI core initialized successfully. Launching GUI...
+2026-06-27 00:09:06,637 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 00:09:06,638 [INFO] gui.widgets.splash_screen: Splash screen initialized.
+2026-06-27 00:09:09,074 [INFO] gui.navigation.page_router: Navigated to: welcome
+2026-06-27 00:09:09,146 [INFO] gui.main_window: Main Window initialized.
+2026-06-27 00:09:09,385 [INFO] gui.app: GUI event loop started.
+2026-06-27 00:09:11,852 [INFO] workspace.workspace_loader: Successfully loaded workspace: Demo 1
+2026-06-27 00:09:11,903 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 00:09:11,903 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 00:09:11,909 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 00:09:11,941 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 00:09:11,943 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 00:09:11,947 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 00:09:12,017 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 00:09:17,607 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 00:09:18,948 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 00:09:19,399 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 00:09:20,351 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 00:09:55,598 [INFO] core.logger: Logging configured from JSON.
+2026-06-27 00:09:55,600 [INFO] core.lifecycle: Executing startup sequence...
+2026-06-27 00:09:55,601 [INFO] core.config_manager: Configuration loaded successfully.
+2026-06-27 00:09:55,601 [INFO] core.lifecycle: Startup sequence complete.
+2026-06-27 00:09:55,602 [INFO] processing.batch_manager: BatchManager initialized.
+2026-06-27 00:09:55,602 [INFO] __main__: StockPilot AI core initialized successfully. Launching GUI...
+2026-06-27 00:09:55,603 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 00:09:55,604 [INFO] gui.widgets.splash_screen: Splash screen initialized.
+2026-06-27 00:09:58,070 [INFO] gui.navigation.page_router: Navigated to: welcome
+2026-06-27 00:09:58,126 [INFO] gui.main_window: Main Window initialized.
+2026-06-27 00:09:58,359 [INFO] gui.app: GUI event loop started.
+2026-06-27 00:10:01,354 [INFO] workspace.workspace_loader: Successfully loaded workspace: Demo 1
+2026-06-27 00:10:01,415 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 00:10:01,416 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 00:10:01,421 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 00:10:01,460 [INFO] image.image_repository: Loaded 10 images from index.
+2026-06-27 00:10:01,463 [INFO] image.image_manager: ImageManager bound to workspace: Demo 1
+2026-06-27 00:10:01,469 [INFO] image.image_scanner: Scan discovered 10 potential assets.
+2026-06-27 00:10:01,550 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 00:10:08,941 [INFO] gui.navigation.page_router: Navigated to: logs
+2026-06-27 00:10:10,089 [INFO] gui.navigation.page_router: Navigated to: seo
+2026-06-27 00:10:10,709 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 00:10:11,106 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 00:10:11,399 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 00:10:12,279 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 00:10:12,723 [INFO] gui.navigation.page_router: Navigated to: dashboard
+2026-06-27 00:10:13,179 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 00:10:14,456 [INFO] gui.navigation.page_router: Navigated to: images
+2026-06-27 00:10:21,412 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 00:10:22,367 [INFO] gui.navigation.page_router: Navigated to: workspaces
+2026-06-27 01:26:50,387 [INFO] core.logger: Logging configured from JSON.
+2026-06-27 01:26:50,400 [INFO] core.lifecycle: Executing startup sequence...
+2026-06-27 01:26:50,403 [INFO] core.config_manager: Configuration loaded successfully.
+2026-06-27 01:26:50,404 [INFO] core.lifecycle: Startup sequence complete.
+2026-06-27 01:26:50,414 [INFO] processing.batch_manager: BatchManager initialized.
+2026-06-27 01:26:50,415 [INFO] __main__: StockPilot AI core initialized successfully. Launching GUI...
+2026-06-27 01:26:50,419 [INFO] core.theme_manager: Theme 'dark' applied.
+2026-06-27 01:26:50,424 [INFO] gui.widgets.splash_screen: Splash screen initialized.
+2026-06-27 01:26:56,792 [INFO] gui.navigation.page_router: Navigated to: welcome
+2026-06-27 01:26:56,934 [INFO] gui.main_window: Main Window initialized.
+2026-06-27 01:26:57,224 [INFO] gui.app: GUI event loop started.
+2026-06-27 01:27:03,513 [INFO] gui.navigation.page_router: Navigated to: ai_studio
+2026-06-27 01:27:05,211 [INFO] gui.navigation.page_router: Navigated to: metadata
+2026-06-27 01:27:06,688 [INFO] gui.navigation.page_router: Navigated to: seo
+2026-06-27 01:27:07,642 [INFO] gui.navigation.page_router: Navigated to: export
+2026-06-27 01:27:08,600 [INFO] gui.navigation.page_router: Navigated to: history
+2026-06-27 01:27:09,870 [INFO] gui.navigation.page_router: Navigated to: analytics
+2026-06-27 01:29:13,996 [INFO] core.lifecycle: Executing shutdown sequence...
+2026-06-27 01:29:13,997 [INFO] core.lifecycle: Shutdown sequence complete.

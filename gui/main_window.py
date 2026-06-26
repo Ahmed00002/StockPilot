@@ -27,7 +27,9 @@ from gui.pages.plugin_page import PluginPage
 from gui.pages.about_page import AboutPage
 from gui.workspaces.workspace_home import WorkspaceHomePage
 from gui.pages.images_page import ImagesPage
+from gui.pages.ai_studio_page import AIStudioPage
 from image.image_events import ImageEvents
+
 
 logger = logging.getLogger(__name__)
 
@@ -137,6 +139,7 @@ class MainWindow(QMainWindow):
         safe_register("help", AboutPage, "Help")
         safe_register("workspaces", WorkspaceHomePage, "Workspaces")
         safe_register("images", ImagesPage, "Images")
+        safe_register("ai_studio", AIStudioPage, "AI Studio")
         
         missing_modules = [
             ("metadata", "Metadata Studio"),
