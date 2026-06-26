@@ -1,0 +1,80 @@
+/* assets/themes/light.qss */
+QMainWindow {
+    background-color: #f0f0f0;
+    color: #333333;
+}
+QWidget {
+    background-color: #f0f0f0;
+    color: #333333;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+}
+QMenuBar {
+    background-color: #e0e0e0;
+    color: #333333;
+    border-bottom: 1px solid #cccccc;
+}
+QMenuBar::item {
+    padding: 4px 10px;
+    background: transparent;
+}
+QMenuBar::item:selected {
+    background-color: #cccccc;
+    color: #000000;
+}
+QMenu {
+    background-color: #f0f0f0;
+    color: #333333;
+    border: 1px solid #cccccc;
+}
+QMenu::item {
+    padding: 6px 24px 6px 24px;
+}
+QMenu::item:selected {
+    background-color: #007acc;
+    color: #ffffff;
+}
+QToolBar {
+    background-color: #e8e8e8;
+    border-bottom: 1px solid #cccccc;
+    spacing: 4px;
+    padding: 4px;
+}
+QToolButton {
+    background-color: transparent;
+    border: none;
+    padding: 4px;
+    border-radius: 4px;
+}
+QToolButton:hover {
+    background-color: #d0d0d0;
+}
+QToolButton:pressed {
+    background-color: #007acc;
+    color: #ffffff;
+}
+QStatusBar {
+    background-color: #007acc;
+    color: #ffffff;
+}
+QStatusBar::item {
+    border: none;
+}
+QSplitter::handle {
+    background-color: #cccccc;
+}
+QFrame {
+    border: none;
+}
+/* Placeholders for sidebar and inspector */
+#LeftSidebar {
+    background-color: #e8e8e8;
+    border-right: 1px solid #cccccc;
+}
+#RightInspector {
+    background-color: #e8e8e8;
+    border-left: 1px solid #cccccc;
+}
+#CentralWorkspace {
+    background-color: #ffffff;
+}
