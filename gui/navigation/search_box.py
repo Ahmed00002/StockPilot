@@ -24,3 +24,4 @@ class SearchBox(QLineEdit):
         
         # Placeholder for search icon integration
         self.addAction(IconLoader.get_icon("search"), QLineEdit.ActionPosition.LeadingPosition)
+        self.returnPressed.connect(lambda: self.search_triggered.emit(self.text()))

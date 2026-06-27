@@ -2,27 +2,39 @@
 import logging
 import httpx
 from typing import Optional
-from groq import Groq
 
 from .groq_config import GroqConfig
 from .groq_errors import GroqAuthenticationError
 
 logger = logging.getLogger("GroqSession")
 
+
+def _import_groq():
+    """Lazily import the groq SDK so the app starts even without it installed."""
+    try:
+        from groq import Groq
+        return Groq
+    except ImportError:
+        raise ImportError(
+            "The 'groq' package is not installed.\n"
+            "Install it with:  pip install groq"
+        )
+
+
 class GroqSession:
     """Controls the generation lifecycle, HTTP connection pools, and instances of the Groq Client."""
 
     def __init__(self, config: GroqConfig):
         self.config = config
-        self._client: Optional[Groq] = None
+        self._client = None
         self._http_client: Optional[httpx.Client] = None
 
     def initialize(self) -> None:
-        """Instantiates the concrete HTTP clients and connects the Groq Client instance wrapper."""
         if not self.config.api_key:
             logger.error("Groq setup aborted: API Key configuration is missing.")
             raise GroqAuthenticationError("An API Key must be supplied to establish a Groq Session.")
-            
+
+        Groq = _import_groq()
         try:
             self._http_client = httpx.Client(
                 timeout=httpx.Timeout(float(self.config.timeout_seconds)),
@@ -39,26 +51,24 @@ class GroqSession:
             logger.error(f"Failed to provision Groq clients: {str(e)}")
             raise
 
-    def get_client(self) -> Groq:
-        """Retrieves or creates the validated Groq client reference."""
+    def get_client(self):
         if self._client is None:
             self.initialize()
         return self._client
 
     def shutdown(self) -> None:
-        """Safely tears down active HTTP connection pools and client sessions."""
         if self._client:
             try:
                 self._client.close()
             except Exception as e:
                 logger.warning(f"Exception managed during Groq client cleanup: {str(e)}")
-                
+
         if self._http_client:
             try:
                 self._http_client.close()
             except Exception as e:
                 logger.warning(f"Exception managed during HTTP transport cleanup: {str(e)}")
-                
+
         self._client = None
         self._http_client = None
         logger.info("Groq background connection pools flushed and decommissioned.")

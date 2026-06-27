@@ -2,51 +2,71 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
     QLabel, QLineEdit, QComboBox, QPushButton, QSpinBox,
-    QMessageBox, QGroupBox
+    QMessageBox, QGroupBox, QScrollArea, QFrame
 )
 from PySide6.QtCore import Qt, Signal
 import logging
 
 from ai.providers.openrouter_config import OpenRouterConfig
-from ai.providers.openrouter_provider import OpenRouterProvider
 
 logger = logging.getLogger("OpenRouterSettingsWidget")
 
+
+def _get_provider(config):
+    from ai.providers.openrouter_provider import OpenRouterProvider
+    return OpenRouterProvider(config)
+
+
 class OpenRouterSettingsWidget(QWidget):
-    """Integrated dashboard UI and operations panel configuration component for the OpenRouter AI Gateway infrastructure."""
+    """Configuration panel for the OpenRouter AI Gateway."""
 
     settings_saved = Signal(OpenRouterConfig)
 
     def __init__(self, current_config: OpenRouterConfig = None, parent=None):
         super().__init__(parent)
         self.config = current_config or OpenRouterConfig()
-        self._setup_ui_components()
+        self._setup_ui()
         self._hydrate_fields()
 
-    def _setup_ui_components(self):
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignTop)
+    def _setup_ui(self):
+        outer = QWidget()
+        layout = QVBoxLayout(outer)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(12)
 
-        # Status and Health Component Panel
-        status_box = QGroupBox("Gateway Connectivity Context")
-        status_layout = QHBoxLayout()
-        self.lbl_status = QLabel("State Monitor: Awaiting Verification")
-        self.btn_verify = QPushButton("Test API Link")
-        self.btn_verify.clicked.connect(self._perform_link_test)
-
-        status_layout.addWidget(self.lbl_status)
-        status_layout.addStretch()
-        status_layout.addWidget(self.btn_verify)
-        status_box.setLayout(status_layout)
+        status_box = QGroupBox("Connection Status")
+        sl = QHBoxLayout(status_box)
+        self.lbl_status = QLabel("● Not verified")
+        self.lbl_status.setStyleSheet("color: #858585;")
+        self.btn_test = QPushButton("Test Connection")
+        self.btn_test.setFixedWidth(140)
+        self.btn_test.clicked.connect(self._test_connection)
+        sl.addWidget(self.lbl_status)
+        sl.addStretch()
+        sl.addWidget(self.btn_test)
         layout.addWidget(status_box)
 
-        # Core Parameter Fields
-        settings_box = QGroupBox("Configuration Options")
-        form = QFormLayout()
+        self.lbl_install_hint = QLabel(
+            "⚠  SDK not installed — run:  <b>pip install openai</b>  (OpenRouter uses the OpenAI SDK)<br>"
+            "The settings form below can still be filled and saved."
+        )
+        self.lbl_install_hint.setTextFormat(Qt.TextFormat.RichText)
+        self.lbl_install_hint.setWordWrap(True)
+        self.lbl_install_hint.setStyleSheet(
+            "color: #d4a017; background: #332b00; border: 1px solid #665500;"
+            "border-radius: 4px; padding: 8px;"
+        )
+        self.lbl_install_hint.setVisible(not self._sdk_available())
+        layout.addWidget(self.lbl_install_hint)
+
+        config_box = QGroupBox("OpenRouter Configuration")
+        form = QFormLayout(config_box)
+        form.setContentsMargins(12, 16, 12, 12)
+        form.setSpacing(10)
 
         self.txt_api_key = QLineEdit()
-        self.txt_api_key.setEchoMode(QLineEdit.Password)
-        self.txt_api_key.setPlaceholderText("Paste secret OpenRouter API token (sk-...)")
+        self.txt_api_key.setEchoMode(QLineEdit.EchoMode.Password)
+        self.txt_api_key.setPlaceholderText("sk-or-...")
 
         self.cb_default_model = QComboBox()
         self.cb_fallback_model = QComboBox()
@@ -63,79 +83,89 @@ class OpenRouterSettingsWidget(QWidget):
         self.cb_routing = QComboBox()
         self.cb_routing.addItems(["manual", "cheapest", "fastest", "highest_context"])
 
-        form.addRow("API Secret Key:", self.txt_api_key)
+        form.addRow("API Key:", self.txt_api_key)
         form.addRow("Default Model:", self.cb_default_model)
         form.addRow("Fallback Model:", self.cb_fallback_model)
-        form.addRow("Connection Timeout:", self.sb_timeout)
-        form.addRow("Max Retry Attempts:", self.sb_retries)
+        form.addRow("Timeout:", self.sb_timeout)
+        form.addRow("Max Retries:", self.sb_retries)
         form.addRow("Routing Preference:", self.cb_routing)
+        layout.addWidget(config_box)
 
-        settings_box.setLayout(form)
-        layout.addWidget(settings_box)
+        btn_row = QHBoxLayout()
+        self.btn_discard = QPushButton("Discard Changes")
+        self.btn_save = QPushButton("Save Configuration")
+        self.btn_save.setStyleSheet("background: #007acc; color: white; font-weight: bold; padding: 5px 16px;")
+        self.btn_discard.clicked.connect(self._hydrate_fields)
+        self.btn_save.clicked.connect(self._save)
+        btn_row.addStretch()
+        btn_row.addWidget(self.btn_discard)
+        btn_row.addWidget(self.btn_save)
+        layout.addLayout(btn_row)
+        layout.addStretch()
 
-        # Commit Bar
-        actions_layout = QHBoxLayout()
-        self.btn_rollback = QPushButton("Discard Changes")
-        self.btn_commit = QPushButton("Apply Configuration")
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidget(outer)
+        root = QVBoxLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.addWidget(scroll)
 
-        self.btn_rollback.clicked.connect(self._hydrate_fields)
-        self.btn_commit.clicked.connect(self._save_ui_state)
-
-        actions_layout.addStretch()
-        actions_layout.addWidget(self.btn_rollback)
-        actions_layout.addWidget(self.btn_commit)
-        layout.addLayout(actions_layout)
+    def _sdk_available(self) -> bool:
+        try:
+            import openai  # noqa: F401
+            return True
+        except ImportError:
+            return False
 
     def _hydrate_fields(self):
-        """Pulls internal config parameter state into visible input controls."""
         self.txt_api_key.setText(self.config.api_key)
         self.cb_default_model.setCurrentText(self.config.default_model)
         self.cb_fallback_model.setCurrentText(self.config.fallback_model)
         self.sb_timeout.setValue(self.config.timeout_seconds)
         self.sb_retries.setValue(self.config.max_retries)
         self.cb_routing.setCurrentText(self.config.routing_preference)
-        self.lbl_status.setText("State Monitor: Unverified")
-        self.lbl_status.setStyleSheet("")
+        self.lbl_status.setText("● Not verified")
+        self.lbl_status.setStyleSheet("color: #858585;")
 
-    def _extract_config_state(self) -> OpenRouterConfig:
-        """Harvests variable structures from active UI entry values to compile an operational config object."""
-        extracted = OpenRouterConfig()
-        extracted.api_key = self.txt_api_key.text().strip()
-        extracted.default_model = self.cb_default_model.currentText()
-        extracted.fallback_model = self.cb_fallback_model.currentText()
-        extracted.timeout_seconds = self.sb_timeout.value()
-        extracted.max_retries = self.sb_retries.value()
-        extracted.routing_preference = self.cb_routing.currentText()
-        return extracted
+    def _build_config(self) -> OpenRouterConfig:
+        c = OpenRouterConfig()
+        c.api_key = self.txt_api_key.text().strip()
+        c.default_model = self.cb_default_model.currentText()
+        c.fallback_model = self.cb_fallback_model.currentText()
+        c.timeout_seconds = self.sb_timeout.value()
+        c.max_retries = self.sb_retries.value()
+        c.routing_preference = self.cb_routing.currentText()
+        return c
 
-    def _perform_link_test(self):
-        self.lbl_status.setText("State Monitor: Probing Target Interface...")
-        self.btn_verify.setEnabled(False)
-
-        provisional_config = self._extract_config_state()
-        tester_provider = OpenRouterProvider(provisional_config)
-
+    def _test_connection(self):
+        if not self._sdk_available():
+            QMessageBox.warning(self, "SDK Missing",
+                                "The 'openai' package is not installed.\n\nRun:  pip install openai")
+            return
+        self.lbl_status.setText("● Testing…")
+        self.lbl_status.setStyleSheet("color: #cccccc;")
+        self.btn_test.setEnabled(False)
         try:
-            health = tester_provider.health_check()
+            provider = _get_provider(self._build_config())
+            health = provider.health_check()
             if health.is_healthy:
-                self.lbl_status.setText(f"State Monitor: Online Response Confirmed ({health.latency_ms:.0f}ms)")
-                self.lbl_status.setStyleSheet("color: #2ecc71; font-weight: bold;")
-                QMessageBox.information(self, "Link Test Success", "Secure handshaking established with OpenRouter gateway servers.")
+                self.lbl_status.setText(f"● Connected  ({health.latency_ms:.0f} ms)")
+                self.lbl_status.setStyleSheet("color: #3fb950; font-weight: bold;")
+                QMessageBox.information(self, "Success", "OpenRouter connection verified successfully.")
             else:
-                self._render_failed_test(health.error_message or "API validation failure.")
+                self._show_error(health.error_message or "Validation failed.")
         except Exception as e:
-            self._render_failed_test(str(e))
+            self._show_error(str(e))
         finally:
-            self.btn_verify.setEnabled(True)
+            self.btn_test.setEnabled(True)
 
-    def _render_failed_test(self, explanation: str):
-        self.lbl_status.setText("State Monitor: Remote Access Denied")
-        self.lbl_status.setStyleSheet("color: #e74c3c; font-weight: bold;")
-        QMessageBox.critical(self, "Interface Access Deficit", f"The connection sequence could not be completed:\n\n{explanation}")
-        logger.error(f"OpenRouter infrastructure connection attempt failed: {explanation}")
+    def _show_error(self, msg: str):
+        self.lbl_status.setText("● Connection failed")
+        self.lbl_status.setStyleSheet("color: #f48771; font-weight: bold;")
+        QMessageBox.critical(self, "Connection Error", msg)
 
-    def _save_ui_state(self):
-        self.config = self._extract_config_state()
+    def _save(self):
+        self.config = self._build_config()
         self.settings_saved.emit(self.config)
-        logger.info("OpenRouter configuration state locked and broadcasted.")
-        QMessageBox.information(self, "Success", "OpenRouter provider parameters committed to application environment storage.")
+        QMessageBox.information(self, "Saved", "OpenRouter settings saved successfully.")

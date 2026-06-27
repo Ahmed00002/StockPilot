@@ -1,134 +1,165 @@
 # gui/ai/gemini_settings_widget.py
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, 
-    QLabel, QLineEdit, QComboBox, QPushButton, QSpinBox, 
-    QMessageBox, QGroupBox
+    QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
+    QLabel, QLineEdit, QComboBox, QPushButton, QSpinBox,
+    QMessageBox, QGroupBox, QScrollArea, QFrame
 )
 from PySide6.QtCore import Qt, Signal
 import logging
 
 from ai.providers.gemini_config import GeminiConfig
-from ai.providers.gemini_provider import GeminiProvider
 
 logger = logging.getLogger("GeminiSettingsWidget")
 
+
+def _get_provider(config):
+    from ai.providers.gemini_provider import GeminiProvider
+    return GeminiProvider(config)
+
+
 class GeminiSettingsWidget(QWidget):
-    """UI Widget for configuring the Google Gemini AI Provider."""
-    
+    """Configuration panel for the Google Gemini provider."""
+
     settings_saved = Signal(GeminiConfig)
 
     def __init__(self, current_config: GeminiConfig = None, parent=None):
         super().__init__(parent)
         self.config = current_config or GeminiConfig()
         self._setup_ui()
-        self._load_config()
+        self._hydrate_fields()
 
     def _setup_ui(self):
-        main_layout = QVBoxLayout(self)
-        main_layout.setAlignment(Qt.AlignTop)
+        outer = QWidget()
+        layout = QVBoxLayout(outer)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(12)
 
-        # Provider Status Group
-        status_group = QGroupBox("Provider Status")
-        status_layout = QHBoxLayout()
-        self.status_label = QLabel("Status: Unchecked")
-        self.btn_test_conn = QPushButton("Test Connection")
-        self.btn_test_conn.clicked.connect(self._on_test_connection)
-        status_layout.addWidget(self.status_label)
-        status_layout.addStretch()
-        status_layout.addWidget(self.btn_test_conn)
-        status_group.setLayout(status_layout)
-        main_layout.addWidget(status_group)
+        status_box = QGroupBox("Connection Status")
+        sl = QHBoxLayout(status_box)
+        self.lbl_status = QLabel("● Not verified")
+        self.lbl_status.setStyleSheet("color: #858585;")
+        self.btn_test = QPushButton("Test Connection")
+        self.btn_test.setFixedWidth(140)
+        self.btn_test.clicked.connect(self._test_connection)
+        sl.addWidget(self.lbl_status)
+        sl.addStretch()
+        sl.addWidget(self.btn_test)
+        layout.addWidget(status_box)
 
-        # Configuration Group
-        config_group = QGroupBox("Gemini Configuration")
-        form_layout = QFormLayout()
+        self.lbl_install_hint = QLabel(
+            "⚠  SDK not installed — run:  <b>pip install google-generativeai</b><br>"
+            "The settings form below can still be filled and saved."
+        )
+        self.lbl_install_hint.setTextFormat(Qt.TextFormat.RichText)
+        self.lbl_install_hint.setWordWrap(True)
+        self.lbl_install_hint.setStyleSheet(
+            "color: #d4a017; background: #332b00; border: 1px solid #665500;"
+            "border-radius: 4px; padding: 8px;"
+        )
+        self.lbl_install_hint.setVisible(not self._sdk_available())
+        layout.addWidget(self.lbl_install_hint)
 
-        self.input_api_key = QLineEdit()
-        self.input_api_key.setEchoMode(QLineEdit.Password)
-        self.input_api_key.setPlaceholderText("Enter Google Gemini API Key")
-        
-        self.combo_text_model = QComboBox()
-        self.combo_vision_model = QComboBox()
-        self.combo_text_model.addItems(self.config.supported_models)
-        self.combo_vision_model.addItems(self.config.supported_models)
+        config_box = QGroupBox("Gemini Configuration")
+        form = QFormLayout(config_box)
+        form.setContentsMargins(12, 16, 12, 12)
+        form.setSpacing(10)
 
-        self.spin_timeout = QSpinBox()
-        self.spin_timeout.setRange(5, 120)
-        self.spin_timeout.setSuffix(" sec")
-        
-        self.spin_retries = QSpinBox()
-        self.spin_retries.setRange(0, 5)
+        self.txt_api_key = QLineEdit()
+        self.txt_api_key.setEchoMode(QLineEdit.EchoMode.Password)
+        self.txt_api_key.setPlaceholderText("AIza...")
 
-        form_layout.addRow("API Key:", self.input_api_key)
-        form_layout.addRow("Default Text Model:", self.combo_text_model)
-        form_layout.addRow("Default Vision Model:", self.combo_vision_model)
-        form_layout.addRow("Timeout:", self.spin_timeout)
-        form_layout.addRow("Max Retries:", self.spin_retries)
+        self.cb_text_model = QComboBox()
+        self.cb_vision_model = QComboBox()
+        self.cb_text_model.addItems(self.config.supported_models)
+        self.cb_vision_model.addItems(self.config.supported_models)
 
-        config_group.setLayout(form_layout)
-        main_layout.addWidget(config_group)
+        self.sb_timeout = QSpinBox()
+        self.sb_timeout.setRange(5, 120)
+        self.sb_timeout.setSuffix(" seconds")
 
-        # Action Buttons
-        btn_layout = QHBoxLayout()
-        self.btn_reset = QPushButton("Reset")
-        self.btn_save = QPushButton("Save Settings")
-        
-        self.btn_reset.clicked.connect(self._load_config)
-        self.btn_save.clicked.connect(self._on_save)
-        
-        btn_layout.addStretch()
-        btn_layout.addWidget(self.btn_reset)
-        btn_layout.addWidget(self.btn_save)
-        
-        main_layout.addLayout(btn_layout)
+        self.sb_retries = QSpinBox()
+        self.sb_retries.setRange(0, 5)
 
-    def _load_config(self):
-        """Populates UI fields from the current configuration."""
-        self.input_api_key.setText(self.config.api_key)
-        self.combo_text_model.setCurrentText(self.config.default_text_model)
-        self.combo_vision_model.setCurrentText(self.config.default_vision_model)
-        self.spin_timeout.setValue(self.config.timeout_seconds)
-        self.spin_retries.setValue(self.config.max_retries)
-        self.status_label.setText("Status: Unchecked")
+        form.addRow("API Key:", self.txt_api_key)
+        form.addRow("Text Model:", self.cb_text_model)
+        form.addRow("Vision Model:", self.cb_vision_model)
+        form.addRow("Timeout:", self.sb_timeout)
+        form.addRow("Max Retries:", self.sb_retries)
+        layout.addWidget(config_box)
 
-    def _build_config_from_ui(self) -> GeminiConfig:
-        """Constructs a new config object based on UI input."""
-        config = GeminiConfig()
-        config.api_key = self.input_api_key.text().strip()
-        config.default_text_model = self.combo_text_model.currentText()
-        config.default_vision_model = self.combo_vision_model.currentText()
-        config.timeout_seconds = self.spin_timeout.value()
-        config.max_retries = self.spin_retries.value()
-        return config
+        btn_row = QHBoxLayout()
+        self.btn_discard = QPushButton("Discard Changes")
+        self.btn_save = QPushButton("Save Configuration")
+        self.btn_save.setStyleSheet("background: #007acc; color: white; font-weight: bold; padding: 5px 16px;")
+        self.btn_discard.clicked.connect(self._hydrate_fields)
+        self.btn_save.clicked.connect(self._save)
+        btn_row.addStretch()
+        btn_row.addWidget(self.btn_discard)
+        btn_row.addWidget(self.btn_save)
+        layout.addLayout(btn_row)
+        layout.addStretch()
 
-    def _on_test_connection(self):
-        self.status_label.setText("Status: Testing...")
-        self.btn_test_conn.setEnabled(False)
-        
-        temp_config = self._build_config_from_ui()
-        provider = GeminiProvider(temp_config)
-        
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidget(outer)
+        root = QVBoxLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.addWidget(scroll)
+
+    def _sdk_available(self) -> bool:
         try:
+            import google.generativeai  # noqa: F401
+            return True
+        except ImportError:
+            return False
+
+    def _hydrate_fields(self):
+        self.txt_api_key.setText(self.config.api_key)
+        self.cb_text_model.setCurrentText(self.config.default_text_model)
+        self.cb_vision_model.setCurrentText(self.config.default_vision_model)
+        self.sb_timeout.setValue(self.config.timeout_seconds)
+        self.sb_retries.setValue(self.config.max_retries)
+        self.lbl_status.setText("● Not verified")
+        self.lbl_status.setStyleSheet("color: #858585;")
+
+    def _build_config(self) -> GeminiConfig:
+        c = GeminiConfig()
+        c.api_key = self.txt_api_key.text().strip()
+        c.default_text_model = self.cb_text_model.currentText()
+        c.default_vision_model = self.cb_vision_model.currentText()
+        c.timeout_seconds = self.sb_timeout.value()
+        c.max_retries = self.sb_retries.value()
+        return c
+
+    def _test_connection(self):
+        if not self._sdk_available():
+            QMessageBox.warning(self, "SDK Missing",
+                                "The 'google-generativeai' package is not installed.\n\nRun:  pip install google-generativeai")
+            return
+        self.lbl_status.setText("● Testing…")
+        self.lbl_status.setStyleSheet("color: #cccccc;")
+        self.btn_test.setEnabled(False)
+        try:
+            provider = _get_provider(self._build_config())
             health = provider.health_check()
             if health.is_healthy:
-                self.status_label.setText(f"Status: Connected ({health.latency_ms:.0f}ms)")
-                self.status_label.setStyleSheet("color: green;")
-                QMessageBox.information(self, "Success", "Successfully connected to Gemini API.")
+                self.lbl_status.setText(f"● Connected  ({health.latency_ms:.0f} ms)")
+                self.lbl_status.setStyleSheet("color: #3fb950; font-weight: bold;")
+                QMessageBox.information(self, "Success", "Gemini connection verified successfully.")
             else:
-                self._handle_conn_error(health.error_message)
+                self._show_error(health.error_message or "Validation failed.")
         except Exception as e:
-            self._handle_conn_error(str(e))
+            self._show_error(str(e))
         finally:
-            self.btn_test_conn.setEnabled(True)
+            self.btn_test.setEnabled(True)
 
-    def _handle_conn_error(self, message: str):
-        self.status_label.setText("Status: Connection Failed")
-        self.status_label.setStyleSheet("color: red;")
-        QMessageBox.critical(self, "Connection Error", f"Failed to connect to Gemini API:\n\n{message}")
-        logger.error(f"Gemini connection test failed: {message}")
+    def _show_error(self, msg: str):
+        self.lbl_status.setText("● Connection failed")
+        self.lbl_status.setStyleSheet("color: #f48771; font-weight: bold;")
+        QMessageBox.critical(self, "Connection Error", msg)
 
-    def _on_save(self):
-        self.config = self._build_config_from_ui()
+    def _save(self):
+        self.config = self._build_config()
         self.settings_saved.emit(self.config)
-        logger.info("Gemini provider settings saved.")
-        QMessageBox.information(self, "Saved", "Gemini settings have been saved successfully.")
+        QMessageBox.information(self, "Saved", "Gemini settings saved successfully.")

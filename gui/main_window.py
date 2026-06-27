@@ -5,8 +5,8 @@ import inspect
 from pathlib import Path
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
-    QSplitter, QStatusBar, QToolBar, QMenuBar, 
-    QMenu, QStackedWidget, QLabel, QFrame, QMessageBox, QFileDialog
+    QSplitter, QStatusBar, QToolBar, QMenuBar, QFormLayout, QTextEdit,
+    QMenu, QStackedWidget, QLabel, QFrame, QMessageBox, QFileDialog, QGroupBox
 )
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtCore import Qt, QSize
@@ -40,6 +40,68 @@ from gui.integration.diagnostics_panel import DiagnosticsPanel
 from image.image_events import ImageEvents
 
 logger = logging.getLogger(__name__)
+
+class RightInspectorPanel(QFrame):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("RightInspector")
+        self.setMinimumWidth(280)
+        
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        
+        # Properties Section
+        props_group = QGroupBox("Properties")
+        props_layout = QFormLayout(props_group)
+        self.lbl_dimensions = QLabel("N/A")
+        self.lbl_file_size = QLabel("N/A")
+        self.lbl_format = QLabel("N/A")
+        self.lbl_color_space = QLabel("N/A")
+        props_layout.addRow("Dimensions:", self.lbl_dimensions)
+        props_layout.addRow("File Size:", self.lbl_file_size)
+        props_layout.addRow("Format:", self.lbl_format)
+        props_layout.addRow("Color Space:", self.lbl_color_space)
+        
+        # Metadata Section
+        meta_group = QGroupBox("Metadata")
+        meta_layout = QVBoxLayout(meta_group)
+        self.txt_metadata = QTextEdit()
+        self.txt_metadata.setReadOnly(True)
+        self.txt_metadata.setMaximumHeight(200)
+        meta_layout.addWidget(self.txt_metadata)
+        
+        # Histogram
+        hist_group = QGroupBox("Histogram")
+        hist_layout = QVBoxLayout(hist_group)
+        self.lbl_histogram = QLabel("[Histogram Visualization]")
+        self.lbl_histogram.setAlignment(Qt.AlignCenter)
+        self.lbl_histogram.setStyleSheet("background: #1e1e1e; min-height: 100px;")
+        hist_layout.addWidget(self.lbl_histogram)
+        
+        layout.addWidget(props_group)
+        layout.addWidget(meta_group)
+        layout.addWidget(hist_group)
+        layout.addStretch()
+    
+    def set_model(self, model):
+        if not model:
+            self.lbl_dimensions.setText("N/A")
+            self.lbl_file_size.setText("N/A")
+            self.lbl_format.setText("N/A")
+            self.lbl_color_space.setText("N/A")
+            self.txt_metadata.clear()
+            return
+        
+        self.lbl_dimensions.setText(f"{model.width} x {model.height}")
+        self.lbl_file_size.setText(f"{model.file_size / 1024:.1f} KB")
+        self.lbl_format.setText(model.format or "Unknown")
+        self.lbl_color_space.setText("RGB")
+        
+        metadata_text = f"Title: {model.title or 'N/A'}\n"
+        metadata_text += f"Keywords: {model.keywords or 'N/A'}\n"
+        metadata_text += f"Description: {model.description or 'N/A'}"
+        self.txt_metadata.setText(metadata_text)
 
 class MainWindow(QMainWindow):
     """The central application window acting as the root layout orchestrator."""
@@ -100,12 +162,9 @@ class MainWindow(QMainWindow):
         workspace_layout.addWidget(self.breadcrumb_bar)
         workspace_layout.addWidget(self.workspace_stack)
         
-        self.right_inspector = QFrame()
-        self.right_inspector.setObjectName("RightInspector")
-        self.right_inspector.setMinimumWidth(250)
-        inspector_layout = QVBoxLayout(self.right_inspector)
-        inspector_layout.addWidget(QLabel("Properties Inspector (Pending)"))
-        self.right_inspector.hide() 
+        self.right_inspector = RightInspectorPanel()
+        self.main_splitter.addWidget(self.right_inspector)
+        # self.right_inspector.hide() 
         
         self.main_splitter.addWidget(self.left_sidebar)
         self.main_splitter.addWidget(workspace_container)
@@ -384,6 +443,7 @@ class MainWindow(QMainWindow):
                 eb.subscribe("ai_model_changed", self._on_model_changed)
                 eb.subscribe("ai_token_usage_updated", self._on_token_usage_updated)
                 eb.subscribe("metadata_status_changed", self._on_metadata_status_changed)
+                eb.subscribe("page_changed", lambda page_id: self._update_breadcrumb(page_id))
 
     def _on_status_workspace_update(self, workspace_name=None) -> None:
         if workspace_name:

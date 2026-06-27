@@ -1,52 +1,72 @@
 # gui/ai/groq_settings_widget.py
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, 
-    QLabel, QLineEdit, QComboBox, QPushButton, QSpinBox, 
-    QMessageBox, QGroupBox
+    QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
+    QLabel, QLineEdit, QComboBox, QPushButton, QSpinBox,
+    QMessageBox, QGroupBox, QScrollArea, QFrame
 )
 from PySide6.QtCore import Qt, Signal
 import logging
 
 from ai.providers.groq_config import GroqConfig
-from ai.providers.groq_provider import GroqProvider
 
 logger = logging.getLogger("GroqSettingsWidget")
 
+
+def _get_provider(config):
+    from ai.providers.groq_provider import GroqProvider
+    return GroqProvider(config)
+
+
 class GroqSettingsWidget(QWidget):
-    """Integrated dashboard UI and operations panel configuration component for the Groq infrastructure."""
-    
+    """Configuration panel for the Groq provider."""
+
     settings_saved = Signal(GroqConfig)
 
     def __init__(self, current_config: GroqConfig = None, parent=None):
         super().__init__(parent)
         self.config = current_config or GroqConfig()
-        self._setup_ui_components()
+        self._setup_ui()
         self._hydrate_fields()
 
-    def _setup_ui_components(self):
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignTop)
+    def _setup_ui(self):
+        outer = QWidget()
+        layout = QVBoxLayout(outer)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(12)
 
-        # Status and Health Component Panel
-        status_box = QGroupBox("Engine Connectivity Context")
-        status_layout = QHBoxLayout()
-        self.lbl_status = QLabel("State Monitor: Awaiting Verification")
-        self.btn_verify = QPushButton("Test API Link")
-        self.btn_verify.clicked.connect(self._perform_link_test)
-        
-        status_layout.addWidget(self.lbl_status)
-        status_layout.addStretch()
-        status_layout.addWidget(self.btn_verify)
-        status_box.setLayout(status_layout)
+        status_box = QGroupBox("Connection Status")
+        sl = QHBoxLayout(status_box)
+        self.lbl_status = QLabel("● Not verified")
+        self.lbl_status.setStyleSheet("color: #858585;")
+        self.btn_test = QPushButton("Test Connection")
+        self.btn_test.setFixedWidth(140)
+        self.btn_test.clicked.connect(self._test_connection)
+        sl.addWidget(self.lbl_status)
+        sl.addStretch()
+        sl.addWidget(self.btn_test)
         layout.addWidget(status_box)
 
-        # Core Parameter Fields
-        settings_box = QGroupBox("Configuration Options")
-        form = QFormLayout()
+        self.lbl_install_hint = QLabel(
+            "⚠  SDK not installed — run:  <b>pip install groq</b><br>"
+            "The settings form below can still be filled and saved."
+        )
+        self.lbl_install_hint.setTextFormat(Qt.TextFormat.RichText)
+        self.lbl_install_hint.setWordWrap(True)
+        self.lbl_install_hint.setStyleSheet(
+            "color: #d4a017; background: #332b00; border: 1px solid #665500;"
+            "border-radius: 4px; padding: 8px;"
+        )
+        self.lbl_install_hint.setVisible(not self._sdk_available())
+        layout.addWidget(self.lbl_install_hint)
+
+        config_box = QGroupBox("Groq Configuration")
+        form = QFormLayout(config_box)
+        form.setContentsMargins(12, 16, 12, 12)
+        form.setSpacing(10)
 
         self.txt_api_key = QLineEdit()
-        self.txt_api_key.setEchoMode(QLineEdit.Password)
-        self.txt_api_key.setPlaceholderText("Paste secret Groq API token (gsk_...)")
+        self.txt_api_key.setEchoMode(QLineEdit.EchoMode.Password)
+        self.txt_api_key.setPlaceholderText("gsk_...")
 
         self.cb_text_model = QComboBox()
         self.cb_vision_model = QComboBox()
@@ -60,76 +80,86 @@ class GroqSettingsWidget(QWidget):
         self.sb_retries = QSpinBox()
         self.sb_retries.setRange(0, 10)
 
-        form.addRow("API Secret Key:", self.txt_api_key)
-        form.addRow("Standard Text Core:", self.cb_text_model)
-        form.addRow("Vision Array Target:", self.cb_vision_model)
-        form.addRow("Connection Timeout:", self.sb_timeout)
-        form.addRow("Max Retry Attempts:", self.sb_retries)
+        form.addRow("API Key:", self.txt_api_key)
+        form.addRow("Text Model:", self.cb_text_model)
+        form.addRow("Vision Model:", self.cb_vision_model)
+        form.addRow("Timeout:", self.sb_timeout)
+        form.addRow("Max Retries:", self.sb_retries)
+        layout.addWidget(config_box)
 
-        settings_box.setLayout(form)
-        layout.addWidget(settings_box)
+        btn_row = QHBoxLayout()
+        self.btn_discard = QPushButton("Discard Changes")
+        self.btn_save = QPushButton("Save Configuration")
+        self.btn_save.setStyleSheet("background: #007acc; color: white; font-weight: bold; padding: 5px 16px;")
+        self.btn_discard.clicked.connect(self._hydrate_fields)
+        self.btn_save.clicked.connect(self._save)
+        btn_row.addStretch()
+        btn_row.addWidget(self.btn_discard)
+        btn_row.addWidget(self.btn_save)
+        layout.addLayout(btn_row)
+        layout.addStretch()
 
-        # Commit Bar
-        actions_layout = QHBoxLayout()
-        self.btn_rollback = QPushButton("Discard Changes")
-        self.btn_commit = QPushButton("Apply Configuration")
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidget(outer)
+        root = QVBoxLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.addWidget(scroll)
 
-        self.btn_rollback.clicked.connect(self._hydrate_fields)
-        self.btn_commit.clicked.connect(self._save_ui_state)
-
-        actions_layout.addStretch()
-        actions_layout.addWidget(self.btn_rollback)
-        actions_layout.addWidget(self.btn_commit)
-        layout.addLayout(actions_layout)
+    def _sdk_available(self) -> bool:
+        try:
+            import groq  # noqa: F401
+            return True
+        except ImportError:
+            return False
 
     def _hydrate_fields(self):
-        """Pulls internal config parameter state into visible input controls."""
         self.txt_api_key.setText(self.config.api_key)
         self.cb_text_model.setCurrentText(self.config.default_text_model)
         self.cb_vision_model.setCurrentText(self.config.default_vision_model)
         self.sb_timeout.setValue(self.config.timeout_seconds)
         self.sb_retries.setValue(self.config.max_retries)
-        self.lbl_status.setText("State Monitor: Unverified")
-        self.lbl_status.setStyleSheet("")
+        self.lbl_status.setText("● Not verified")
+        self.lbl_status.setStyleSheet("color: #858585;")
 
-    def _extract_config_state(self) -> GroqConfig:
-        """Harvests variable structures from active UI entry values to compile an operational config object."""
-        extracted = GroqConfig()
-        extracted.api_key = self.txt_api_key.text().strip()
-        extracted.default_text_model = self.cb_text_model.currentText()
-        extracted.default_vision_model = self.cb_vision_model.currentText()
-        extracted.timeout_seconds = self.sb_timeout.value()
-        extracted.max_retries = self.sb_retries.value()
-        return extracted
+    def _build_config(self) -> GroqConfig:
+        c = GroqConfig()
+        c.api_key = self.txt_api_key.text().strip()
+        c.default_text_model = self.cb_text_model.currentText()
+        c.default_vision_model = self.cb_vision_model.currentText()
+        c.timeout_seconds = self.sb_timeout.value()
+        c.max_retries = self.sb_retries.value()
+        return c
 
-    def _perform_link_test(self):
-        self.lbl_status.setText("State Monitor: Probing Target Interface...")
-        self.btn_verify.setEnabled(False)
-        
-        provisional_config = self._extract_config_state()
-        tester_provider = GroqProvider(provisional_config)
-        
+    def _test_connection(self):
+        if not self._sdk_available():
+            QMessageBox.warning(self, "SDK Missing",
+                                "The 'groq' package is not installed.\n\nRun:  pip install groq")
+            return
+        self.lbl_status.setText("● Testing…")
+        self.lbl_status.setStyleSheet("color: #cccccc;")
+        self.btn_test.setEnabled(False)
         try:
-            health = tester_provider.health_check()
+            provider = _get_provider(self._build_config())
+            health = provider.health_check()
             if health.is_healthy:
-                self.lbl_status.setText(f"State Monitor: Online Response Confirmed ({health.latency_ms:.0f}ms)")
-                self.lbl_status.setStyleSheet("color: #2ecc71; font-weight: bold;")
-                QMessageBox.information(self, "Link Test Success", "Secure handshaking established with Groq cloud servers.")
+                self.lbl_status.setText(f"● Connected  ({health.latency_ms:.0f} ms)")
+                self.lbl_status.setStyleSheet("color: #3fb950; font-weight: bold;")
+                QMessageBox.information(self, "Success", "Groq connection verified successfully.")
             else:
-                self._render_failed_test(health.error_message or "API validation failure.")
+                self._show_error(health.error_message or "Validation failed.")
         except Exception as e:
-            self._render_failed_test(str(e))
+            self._show_error(str(e))
         finally:
-            self.btn_verify.setEnabled(True)
+            self.btn_test.setEnabled(True)
 
-    def _render_failed_test(self, explanation: str):
-        self.lbl_status.setText("State Monitor: Remote Access Denied")
-        self.lbl_status.setStyleSheet("color: #e74c3c; font-weight: bold;")
-        QMessageBox.critical(self, "Interface Access Deficit", f"The connection sequence could not be completed:\n\n{explanation}")
-        logger.error(f"Groq infrastructure connection attempt failed: {explanation}")
+    def _show_error(self, msg: str):
+        self.lbl_status.setText("● Connection failed")
+        self.lbl_status.setStyleSheet("color: #f48771; font-weight: bold;")
+        QMessageBox.critical(self, "Connection Error", msg)
 
-    def _save_ui_state(self):
-        self.config = self._extract_config_state()
+    def _save(self):
+        self.config = self._build_config()
         self.settings_saved.emit(self.config)
-        logger.info("Groq configuration state locked and broadcasted.")
-        QMessageBox.information(self, "Success", "Groq provider parameters committed to application environment storage.")
+        QMessageBox.information(self, "Saved", "Groq settings saved successfully.")

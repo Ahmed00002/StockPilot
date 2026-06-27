@@ -72,6 +72,11 @@ class ImagesPage(QWidget):
             
         # INTEGRATION FIX: Direct navigation to Metadata Studio upon double-click
         self.grid.doubleClicked.connect(lambda idx: self.action_requested.emit("metadata_studio"))
+        if self.container:
+            tp = self.container.get_service("thread_pool")
+            if tp:
+                # Thumbnail generation queue setup
+                pass
             
         if self.container:
             eb = self.container.get_service("event_bus")

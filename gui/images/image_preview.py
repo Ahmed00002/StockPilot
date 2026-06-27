@@ -37,13 +37,12 @@ class ImagePreviewWidget(QWidget):
 
     def set_image(self, model) -> None:
         """Convenience method to load from an ImageModel or clear the view."""
-        if not model:
+        if not model.absolute_path or not Path(model.absolute_path).exists():
+            self.lbl_info.setText(f"Image file not found: {model.filename}")
             self.pixmap_item.setPixmap(QPixmap())
-            self.lbl_info.setText("No Image Selected")
             return
             
-        img = QImage(model.absolute_path)
-        if not img.isNull():
-            self.load_image(img, model.filename)
-        else:
+        img = QImage(str(model.absolute_path))
+        if img.isNull():
             self.lbl_info.setText(f"Failed to load: {model.filename}")
+            return

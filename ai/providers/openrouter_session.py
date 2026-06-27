@@ -2,27 +2,39 @@
 import logging
 import httpx
 from typing import Optional
-from openai import OpenAI
 
 from .openrouter_config import OpenRouterConfig
 from .openrouter_errors import OpenRouterAuthenticationError
 
 logger = logging.getLogger("OpenRouterSession")
 
+
+def _import_openai():
+    """Lazily import the openai SDK (used for OpenRouter compatibility)."""
+    try:
+        from openai import OpenAI
+        return OpenAI
+    except ImportError:
+        raise ImportError(
+            "The 'openai' package is not installed.\n"
+            "Install it with:  pip install openai"
+        )
+
+
 class OpenRouterSession:
     """Manages reusable transport layers and OpenRouter API wrappers efficiently."""
 
     def __init__(self, config: OpenRouterConfig):
         self.config = config
-        self._client: Optional[OpenAI] = None
+        self._client = None
         self._http_client: Optional[httpx.Client] = None
 
     def initialize(self) -> None:
-        """Configures transport boundaries and underlying network handlers for OpenRouter endpoints."""
         if not self.config.api_key:
             logger.error("OpenRouter Gateway setup rejected: API key parameter missing.")
             raise OpenRouterAuthenticationError("An active API key structure must be present to connect to OpenRouter.")
-            
+
+        OpenAI = _import_openai()
         try:
             self._http_client = httpx.Client(
                 timeout=httpx.Timeout(float(self.config.timeout_seconds)),
@@ -44,25 +56,24 @@ class OpenRouterSession:
             logger.error(f"Failed to provision OpenRouter network stack: {str(e)}")
             raise
 
-    def get_client(self) -> OpenAI:
+    def get_client(self):
         if self._client is None:
             self.initialize()
         return self._client
 
     def shutdown(self) -> None:
-        """Gently flushes open TCP resources and deconstructs remaining interface abstractions."""
         if self._client:
             try:
                 self._client.close()
             except Exception as e:
                 logger.warning(f"Error captured during OpenRouter client tear-down: {str(e)}")
-                
+
         if self._http_client:
             try:
                 self._http_client.close()
             except Exception as e:
                 logger.warning(f"Error captured during OpenRouter HTTP channel extraction: {str(e)}")
-                
+
         self._client = None
         self._http_client = None
         logger.info("OpenRouter persistent network allocations disassembled cleanly.")

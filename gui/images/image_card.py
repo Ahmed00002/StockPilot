@@ -53,7 +53,7 @@ class ImageCardDelegate(QStyledItemDelegate):
         thumb_rect = QRect(rect.left() + 4, rect.top() + 4, rect.width() - 8, rect.height() - 30)
         
         # Pixmap retrieval
-        if model.thumbnail_path and model.thumbnail_path in self.thumbnail_cache:
+        if model.thumbnail_path and str(model.thumbnail_path) in self.thumbnail_cache:
             pixmap = self.thumbnail_cache[model.thumbnail_path]
             self.thumbnail_cache.move_to_end(model.thumbnail_path)
         else:
